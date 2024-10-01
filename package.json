@@ -50,11 +50,10 @@
     "react-images-viewer": "1.7.1",
     "react-password-checklist": "^1.8.0",
     "react-router-dom": "6.11.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-table": "7.8.0",
     "simple-react-validator": "^1.6.2",
     "stylis": "4.1.4",
-    "stylis-plugin-rtl": "^2.1.1",
     "uuid": "9.0.0",
     "yup": "1.1.1"
   },
@@ -87,7 +86,6 @@
   },
   "devDependencies": {
     "ajv": "^8.8.2",
-    "eslint": "8.39.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-jsx-a11y": "6.7.1",
