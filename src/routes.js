@@ -37,33 +37,18 @@ Coded by www.creative-tim.com
 
 // Material Dashboard 2 PRO React layouts
 import Analytics from "layouts/dashboards/analytics";
-import Sales from "layouts/dashboards/sales";
-import ProfileOverview from "layouts/pages/profile/profile-overview";
-import AllProjects from "layouts/pages/profile/all-projects";
-import NewUser from "layouts/pages/users/new-user";
-import Settings from "layouts/pages/account/settings";
-import Billing from "layouts/pages/account/billing";
-import Invoice from "layouts/pages/account/invoice";
-import Timeline from "layouts/pages/projects/timeline";
-import PricingPage from "layouts/pages/pricing-page";
-import Widgets from "layouts/pages/widgets";
-import RTL from "layouts/pages/rtl";
-import Charts from "layouts/pages/charts";
-import Notifications from "layouts/pages/notifications";
-import Kanban from "layouts/applications/kanban";
-import Wizard from "layouts/applications/wizard";
-import DataTables from "layouts/applications/data-tables";
-import Calendar from "layouts/applications/calendar";
-import NewProduct from "layouts/ecommerce/products/new-product";
-import EditProduct from "layouts/ecommerce/products/edit-product";
-import ProductPage from "layouts/ecommerce/products/product-page";
-import OrderList from "layouts/ecommerce/orders/order-list";
-import OrderDetails from "layouts/ecommerce/orders/order-details";
-import SignInBasic from "layouts/authentication/sign-in/basic";
-import SignInCover from "layouts/authentication/sign-in/cover";
+import AlreadySubscribed from "layouts/static/alreadySubscribed";
+import ConfirmEmail from "layouts/static/confirmEmail";
+import Thankyou from "layouts/static/thankyou";
+import Billing from "layouts/Billing";
+import Subscription from "layouts/authentication/sign-up/subscription";
+import PasswordReset from "layouts/authentication/sign-in/passwordReset";
+import ForgotDone from "layouts/authentication/sign-in/forgotDone";
+import Forgot from "layouts/authentication/sign-in/forgot";
+import Done from "layouts/authentication/sign-up/done";
+import Terms from "layouts/terms";
 import SignInIllustration from "layouts/authentication/sign-in/illustration";
 import SignUpCover from "layouts/authentication/sign-up/cover";
-import ResetCover from "layouts/authentication/reset-password/cover";
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -88,21 +73,9 @@ const routes = [
     ),
     collapse: [
       {
-        name: "My Profile",
-        key: "profile-overview",
-        route: "/pages/profile/profile-overview",
-        component: <ProfileOverview />,
-      },
-      {
-        name: "Settings",
-        key: "settings",
-        route: "/pages/account/settings",
-        component: <Settings />,
-      },
-      {
         name: "Logout",
         key: "logout",
-        route: "/authentication/sign-in/illustration",
+        route: "/sign-in",
         component: <SignInIllustration />,
       },
     ],
@@ -119,16 +92,93 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Projects",
-    key: "projects",
-    collapse: [
-      {
-        name: "Timeline",
-        key: "timeline",
-        route: "/pages/projects/timeline",
-        component: <Timeline />,
-      },
-    ],
+    name: "Billing",
+    key: "billing",
+    icon: "credit_card",
+    route: "/billing",
+    component: <Billing />,
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Sign Up",
+    key: "sign-up",
+    icon: "",
+    route: "/authentication/sign-up/cover",
+    component: <SignUpCover />,
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Terms",
+    key: "terms",
+    icon: "",
+    route: "/terms",
+    component: <Terms />,
+  },
+  {
+    type: "route",
+    name: "Done",
+    key: "done",
+    icon: "",
+    route: "/done",
+    component: <Done />,
+  },
+  {
+    type: "route",
+    name: "forgot",
+    key: "forgot",
+    icon: "",
+    route: "/forgot",
+    component: <Forgot />,
+  },
+  {
+    type: "route",
+    name: "forgotDone",
+    key: "forgotDone",
+    icon: "",
+    route: "/forgotDone",
+    component: <ForgotDone />,
+  },
+  {
+    type: "route",
+    name: "passwordReset",
+    key: "passwordReset",
+    icon: "",
+    route: "/passwordReset",
+    component: <PasswordReset />,
+  },
+  {
+    type: "route",
+    name: "Subscription",
+    key: "subscription",
+    icon: "",
+    route: "/subscription",
+    component: <Subscription />,
+  },
+  {
+    type: "route",
+    name: "thankyou",
+    key: "thankyou",
+    icon: "",
+    route: "/thank-you",
+    component: <Thankyou />,
+  },
+  {
+    type: "route",
+    name: "alreadySubscribed",
+    key: "alreadySubscribed",
+    icon: "",
+    route: "/already-subscribed",
+    component: <AlreadySubscribed />,
+  },
+  {
+    type: "route",
+    name: "confirmEmail",
+    key: "confirmEmail",
+    icon: "",
+    route: "/confirm-email",
+    component: <ConfirmEmail />,
   },
 ];
 

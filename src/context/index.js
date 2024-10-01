@@ -27,7 +27,7 @@ import PropTypes from "prop-types";
 const MaterialUI = createContext();
 
 // Setting custom name for the context which is visible on react dev tools
-MaterialUI.displayName = "FunnelSenseContext";
+MaterialUI.displayName = "OmegaContext";
 
 // Material Dashboard 2 PRO React reducer
 function reducer(state, action) {

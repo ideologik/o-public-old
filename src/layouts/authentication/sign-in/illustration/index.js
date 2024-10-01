@@ -33,7 +33,7 @@ import MDButton from "components/MDButton";
 import IllustrationLayout from "layouts/authentication/components/IllustrationLayout";
 
 // Image
-import bgImage from "assets/images/illustrations/illustration-reset.jpg";
+import bgImage from "assets/images/illustrations/illustration-verification.jpg";
 import { IconButton, InputAdornment, Tooltip } from "@mui/material";
 
 // ApiClient
@@ -67,8 +67,7 @@ function Illustration() {
     client
       .request(options)
       .then((response) => {
-        console.log("RESPONSE", response);
-        if (response == "unauthorized") setErrorSB(true);
+        if (response == "Unauthorized") setErrorSB(true);
         else if (response.toString().indexOf("http") !== -1) {
           window.location.href = response;
         } else {
@@ -89,11 +88,16 @@ function Illustration() {
               localStorage.setItem("unlayerID", 205839);
               localStorage.setItem("plName", "mailSense");
               break;
+            case "funnelsense.ai":
+              localStorage.setItem("unlayerID", 205839);
+              localStorage.setItem("plName", "funnelsense");
+              break;
             default:
               localStorage.setItem("unlayerID", 229090);
               localStorage.setItem("plName", "SendPad");
               break;
           }
+          localStorage.setItem("account", JSON.stringify(response));
           localStorage.setItem("AuthorizationToken", JSON.stringify(response.user_token));
           localStorage.setItem("userName", response.user_name);
           localStorage.setItem(
@@ -101,6 +105,7 @@ function Illustration() {
             "https://cdn-icons-png.flaticon.com/512/149/149071.png"
           );
           navigate("/dashboard");
+          window.location.reload();
         }
       })
       .catch((error) => {
@@ -215,6 +220,7 @@ function Illustration() {
           </MDTypography>
         </MDBox>
       </MDBox>
+      {renderErrorSB}
     </IllustrationLayout>
   );
 }

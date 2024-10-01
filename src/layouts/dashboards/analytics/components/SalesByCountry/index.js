@@ -26,13 +26,10 @@ import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
-// Material Dashboard 2 PRO React examples
+// Data
 import SalesTable from "examples/Tables/SalesTable";
 
-// Data
-import salesTableData from "layouts/dashboards/analytics/components/SalesByCountry/data/salesTableData";
-
-function SalesByCountry() {
+function SalesByCountry(dashboardData) {
   return (
     <Card sx={{ width: "100%" }}>
       <MDBox display="flex">
@@ -55,44 +52,23 @@ function SalesByCountry() {
           </Icon>
         </MDBox>
         <MDTypography variant="h6" sx={{ mt: 2, mb: 1, ml: 2 }}>
-          Sales by Country
+          Visits by Country
         </MDTypography>
       </MDBox>
       <MDBox p={2}>
         <Grid container>
           <Grid item xs={12} md={7} lg={6}>
-            <SalesTable rows={salesTableData} shadow={false} />
+            <SalesTable rows={dashboardData.salesTableData.traffic_by_country} shadow={false} />
           </Grid>
+
           <Grid item xs={12} md={5} lg={6} sx={{ mt: { xs: 5, lg: 0 } }}>
             <VectorMap
               map={worldMerc}
-              zoomOnScroll={false}
+              zoomOnScroll={true}
               zoomButtons={false}
               markersSelectable
               backgroundColor="transparent"
-              selectedMarkers={[1, 3]}
-              markers={[
-                {
-                  name: "USA",
-                  latLng: [40.71296415909766, -74.00437720027804],
-                },
-                {
-                  name: "Germany",
-                  latLng: [51.17661451970939, 10.97947735117339],
-                },
-                {
-                  name: "Brazil",
-                  latLng: [-7.596735421549542, -54.781694323779185],
-                },
-                {
-                  name: "Russia",
-                  latLng: [62.318222797104276, 89.81564777631716],
-                },
-                {
-                  name: "China",
-                  latLng: [22.320178999475512, 114.17161225541399],
-                },
-              ]}
+              markers={dashboardData.salesTableData.map_markers}
               regionStyle={{
                 initial: {
                   fill: "#dee2e7",
