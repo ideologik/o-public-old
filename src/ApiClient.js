@@ -56,7 +56,7 @@ client.interceptors.response.use(
       // return JSON.parse("[{}]");
     }
     if (error.response.status === 401) {
-      window.location.href = "/authentication/sign-in/illustration";
+      window.location.href = "/sign-in";
     }
     if (error.response.status === 400) return JSON.parse("[{}]");
   }
