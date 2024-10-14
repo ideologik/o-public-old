@@ -55,6 +55,9 @@ import MDAvatar from "components/MDAvatar";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
+import Home from "layouts/pages/home/Home";
+import MyDeals from "layouts/pages/my-deals/MyDeals";
+import Support from "layouts/pages/support/Support";
 
 // Images
 // import profilePicture from "assets/images/team-3.jpg";
@@ -83,20 +86,29 @@ const routes = [
   { type: "divider", key: "divider-0" },
   {
     type: "collapse",
-    name: "Dashboard",
-    key: "dashboard",
-    icon: "dashboard",
-    route: "/dashboard",
-    component: <Analytics />,
+    name: "Home",
+    key: "home",
+    icon: <Icon>home</Icon>, // Ícono de MUI para Home
+    route: "/home",
+    component: <Home />,
     noCollapse: true,
   },
   {
     type: "collapse",
-    name: "Billing",
-    key: "billing",
-    icon: "credit_card",
-    route: "/billing",
-    component: <Billing />,
+    name: "My Deals",
+    key: "my-deals",
+    icon: <Icon>shopping_cart</Icon>, // Ícono de MUI para Deals
+    route: "/my-deals",
+    component: <MyDeals />,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Support",
+    key: "support",
+    icon: <Icon>support_agent</Icon>, // Ícono de MUI para soporte
+    route: "/support",
+    component: <Support />,
     noCollapse: true,
   },
   {

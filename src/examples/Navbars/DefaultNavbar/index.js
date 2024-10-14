@@ -587,7 +587,7 @@ function DefaultNavbar({ routes, brand, transparent, light, action }) {
 
 // Declaring default props for DefaultNavbar
 DefaultNavbar.defaultProps = {
-  brand: "FunnelSense",
+  brand: "Funnel Sense",
   transparent: false,
   light: false,
   action: false,
