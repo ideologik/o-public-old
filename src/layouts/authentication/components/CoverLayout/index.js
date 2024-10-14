@@ -27,7 +27,7 @@ import MDBox from "components/MDBox";
 import PageLayout from "examples/LayoutContainers/PageLayout";
 
 // Authentication layout components
-import Footer from "layouts/authentication/components/Footer";
+// import Footer from "layouts/authentication/components/Footer";
 
 // Material Dashboard 2 PRO React page layout routes
 import pageRoutes from "page.routes";
@@ -62,7 +62,6 @@ function CoverLayout({ coverHeight, image, children }) {
           </Grid>
         </Grid>
       </MDBox>
-      <Footer />
     </PageLayout>
   );
 }

@@ -36,6 +36,7 @@
     "draft-js": "^0.11.7",
     "dropzone": "6.0.0-beta.2",
     "env-cmd": "^10.1.0",
+    "f": "^1.4.0",
     "flatpickr": "4.6.13",
     "formik": "2.2.9",
     "html-react-parser": "3.0.16",
@@ -50,11 +51,12 @@
     "react-images-viewer": "1.7.1",
     "react-password-checklist": "^1.8.0",
     "react-router-dom": "6.11.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
+    "react-select": "^5.8.1",
     "react-table": "7.8.0",
+    "react-timezone-select": "^3.2.8",
     "simple-react-validator": "^1.6.2",
     "stylis": "4.1.4",
-    "stylis-plugin-rtl": "^2.1.1",
     "uuid": "9.0.0",
     "yup": "1.1.1"
   },
@@ -62,7 +64,7 @@
     "start-omega": "set GENERATE_SOURCEMAP=false && set PORT=80 && set PORT=443 && set HTTPS=true && env-cmd -f .env.omega react-scripts start",
     "start": "set GENERATE_SOURCEMAP=false && react-scripts start",
     "build": "set GENERATE_SOURCEMAP=false react-scripts build",
-    "build-omega": "set GENERATE_SOURCEMAP=false && env-cmd -f .env.omega react-scripts start",
+    "build-omega": "set GENERATE_SOURCEMAP=false && env-cmd -f .env.omega react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start"
@@ -86,7 +88,7 @@
     ]
   },
   "devDependencies": {
-    "eslint": "8.39.0",
+    "ajv": "^8.8.2",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-react": "7.32.2",

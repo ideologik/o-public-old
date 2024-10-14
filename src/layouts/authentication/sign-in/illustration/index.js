@@ -71,41 +71,43 @@ function Illustration() {
         else if (response.toString().indexOf("http") !== -1) {
           window.location.href = response;
         } else {
-          switch (process.env.REACT_APP_MAIN_DOMAIN) {
-            case "localhost":
-              localStorage.setItem("unlayerID", 229090);
-              localStorage.setItem("plName", "SendPad");
-              break;
-            case "sendpaddev.com":
-              localStorage.setItem("unlayerID", 229090);
-              localStorage.setItem("plName", "SendPad");
-              break;
-            case "sendpad.com":
-              localStorage.setItem("unlayerID", 229090);
-              localStorage.setItem("plName", "SendPad");
-              break;
-            case "mailsense.ai":
-              localStorage.setItem("unlayerID", 205839);
-              localStorage.setItem("plName", "mailSense");
-              break;
-            case "funnelsense.ai":
-              localStorage.setItem("unlayerID", 205839);
-              localStorage.setItem("plName", "funnelsense");
-              break;
-            default:
-              localStorage.setItem("unlayerID", 229090);
-              localStorage.setItem("plName", "SendPad");
-              break;
-          }
-          localStorage.setItem("account", JSON.stringify(response));
-          localStorage.setItem("AuthorizationToken", JSON.stringify(response.user_token));
-          localStorage.setItem("userName", response.user_name);
-          localStorage.setItem(
-            "userPicture",
-            "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-          );
-          navigate("/dashboard");
-          window.location.reload();
+          if (response.user_token !== undefined) {
+            switch (process.env.REACT_APP_MAIN_DOMAIN) {
+              case "localhost":
+                localStorage.setItem("unlayerID", 229090);
+                localStorage.setItem("plName", "SendPad");
+                break;
+              case "sendpaddev.com":
+                localStorage.setItem("unlayerID", 229090);
+                localStorage.setItem("plName", "SendPad");
+                break;
+              case "sendpad.com":
+                localStorage.setItem("unlayerID", 229090);
+                localStorage.setItem("plName", "SendPad");
+                break;
+              case "mailsense.ai":
+                localStorage.setItem("unlayerID", 205839);
+                localStorage.setItem("plName", "mailSense");
+                break;
+              case "funnelsense.ai":
+                localStorage.setItem("unlayerID", 205839);
+                localStorage.setItem("plName", "funnelsense");
+                break;
+              default:
+                localStorage.setItem("unlayerID", 229090);
+                localStorage.setItem("plName", "SendPad");
+                break;
+            }
+            localStorage.setItem("account", JSON.stringify(response));
+            localStorage.setItem("AuthorizationToken", JSON.stringify(response.user_token));
+            localStorage.setItem("userName", response.user_name);
+            localStorage.setItem(
+              "userPicture",
+              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            );
+            navigate("/dashboard");
+            window.location.reload();
+          } else setErrorSB(true);
         }
       })
       .catch((error) => {
@@ -180,18 +182,6 @@ function Illustration() {
               ),
             }}
           />
-        </MDBox>
-        <MDBox display="flex" alignItems="center" ml={-1}>
-          <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-          <MDTypography
-            variant="button"
-            fontWeight="regular"
-            color="text"
-            onClick={handleSetRememberMe}
-            sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
-          >
-            &nbsp;&nbsp;Remember me
-          </MDTypography>
         </MDBox>
         <MDBox mt={4} mb={1}>
           <MDButton

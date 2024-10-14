@@ -95,13 +95,13 @@ function Analytics() {
   };
 
   useEffect(() => {
-    getPages();
-    getData();
-    planInformation();
+   // getPages();
+   // getData();
+   // planInformation();
   }, []);
 
   useEffect(() => {
-    getData();
+   // getData();
   }, [selectedPage]);
 
   useEffect(() => {

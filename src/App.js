@@ -39,7 +39,7 @@ import themeDark from "assets/theme-dark";
 import themeDarkRTL from "assets/theme-dark/theme-rtl";
 
 // RTL plugins
-import rtlPlugin from "stylis-plugin-rtl";
+
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { FeatureFlags } from "context/FeatureFlags";
@@ -81,16 +81,6 @@ export default function App() {
   theme.palette.primary.focus = features.colorPrimaryFocus;
   theme.palette.gradients.primary.main = features.colorPrimaryGradient;
   theme.palette.gradients.primary.state = features.colorPrimaryGradientState;
-
-  // Cache for the rtl
-  useMemo(() => {
-    const cacheRtl = createCache({
-      key: "rtl",
-      stylisPlugins: [rtlPlugin],
-    });
-
-    setRtlCache(cacheRtl);
-  }, []);
 
   // Open sidenav when mouse enter on mini sidenav
   const handleOnMouseEnter = () => {

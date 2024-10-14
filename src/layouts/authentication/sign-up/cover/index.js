@@ -52,7 +52,8 @@ function Cover() {
   const [passwordAgain, setPasswordAgain] = useState("");
   const [validPassword, setValidPassword] = useState(false);
   const [, forceUpdate] = useState();
-  const simpleValidator = useRef(new SimpleReactValidator());
+  const [iagree, setIagree] = useState(false);
+  //  const simpleValidator = useRef(new SimpleReactValidator());
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [couponCode, setCouponCode] = useState("");
@@ -64,6 +65,33 @@ function Cover() {
   const Login = () => {
     navigate("/done?email=" + email);
   };
+
+  const simpleValidator = useRef(
+    new SimpleReactValidator({
+      validators: {
+        passwords: {
+          // name the rule
+          message: "Please check the password requirements",
+          rule: (val, params, validator) => {
+            return val;
+          },
+          messageReplace: (message, params) =>
+            message.replace(":values", this.helpers.toSentence(params)), // optional
+          required: true, // optional
+        },
+        iagree: {
+          // name the rule
+          message: "Please accept Terms and Conditions",
+          rule: (val, params, validator) => {
+            return val;
+          },
+          messageReplace: (message, params) =>
+            message.replace(":values", this.helpers.toSentence(params)), // optional
+          required: true, // optional
+        },
+      },
+    })
+  );
 
   const handleLogin = () => {
     if (simpleValidator.current.allValid()) {
@@ -128,6 +156,7 @@ function Cover() {
           <MDBox component="form" role="form">
             <MDBox mb={2}>
               <MDInput
+                required
                 type="text"
                 label="Name"
                 variant="standard"
@@ -135,6 +164,7 @@ function Cover() {
                 onChange={(e) => setName(e.target.value)}
                 value={name}
               />
+              <MDBox color="red">{simpleValidator.current.message("Name", name, "required")}</MDBox>
             </MDBox>
             <MDBox mb={2}>
               <MDInput
@@ -237,6 +267,9 @@ function Cover() {
                   ),
                 }}
               />
+              <MDBox color="red">
+                {simpleValidator.current.message("Password", validPassword, "passwords")}
+              </MDBox>
             </MDBox>
 
             <MDBox mb={2}>
@@ -250,7 +283,7 @@ function Cover() {
               />
             </MDBox>
             <MDBox display="flex" alignItems="center" ml={-1}>
-              <Checkbox />
+              <Checkbox onChange={(e) => setIagree(!iagree)} value={iagree} />
               <MDTypography
                 variant="button"
                 fontWeight="regular"
@@ -270,11 +303,13 @@ function Cover() {
                 Terms and Conditions
               </MDTypography>
             </MDBox>
+            <MDBox color="red">{simpleValidator.current.message("iagree", iagree, "iagree")}</MDBox>
             <MDBox mt={4} mb={1}>
               <MDButton
                 disabled={isLoading}
                 variant="gradient"
                 color="info"
+                style={{ cursor: isLoading ? "not-allowed" : "pointer", color: "white" }}
                 fullWidth
                 onClick={() => handleLogin()}
               >
