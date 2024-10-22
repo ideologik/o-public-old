@@ -3,6 +3,10 @@ import axios from "axios";
 const client = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL,
 });
+// Función para cambiar la baseURL cuando sea necesario
+export const setBaseURL = (url) => {
+  client.defaults.baseURL = url;
+};
 
 // Set the AUTH token for any request
 client.interceptors.request.use((config) => {
@@ -49,14 +53,17 @@ client.interceptors.response.use(
     }
   },
   (error) => {
+    console.log("err", error);
     if (error.code === "ERR_NETWORK") return JSON.parse("[{}]");
     if (error.response.status === 401 && localStorage.getItem("AuthorizationToken") !== null) {
+      console.log("err1", error);
       localStorage.removeItem("AuthorizationToken");
       window.location.href = "/index.html";
       // return JSON.parse("[{}]");
     }
     if (error.response.status === 401) {
-      window.location.href = "/sign-in";
+      console.log("err2", error);
+      return "unauthorized";
     }
     if (error.response.status === 400) return JSON.parse("[{}]");
   }

@@ -61,7 +61,8 @@ function Illustration() {
 
     options.params = {
       email: email,
-      password: password,
+      // base64 encoded password
+      password: btoa(password),
     };
 
     client
@@ -105,7 +106,7 @@ function Illustration() {
               "userPicture",
               "https://cdn-icons-png.flaticon.com/512/149/149071.png"
             );
-            navigate("/dashboard");
+            navigate("/home");
             window.location.reload();
           } else setErrorSB(true);
         }
