@@ -1,109 +1,184 @@
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  IconButton,
-} from "@mui/material";
-import { Visibility, Lock, Warning } from "@mui/icons-material";
+import React, { useEffect, useState, useCallback } from "react";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
 import PropTypes from "prop-types";
-import client from "ApiClient";
+import { Visibility, Lock, Warning, LockOpen } from "@mui/icons-material";
+import { CircularProgress, Grid, IconButton, Tooltip } from "@mui/material";
+import { fetchDeals, fetchCredit, checkDeal } from "services";
+import DealDetails from "./DealDetails";
 
 const TableDeals = ({ filters }) => {
   const [deals, setDeals] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState(null);
 
   useEffect(() => {
-    // Llamada a la API usando los filtros para obtener los deals filtrados
-    const fetchDeals = async () => {
+    const fetch = async () => {
+      setLoading(true);
       try {
-        let response = await client.get("deals", { params: filters });
-        if (filters.hideNoSalesRank) {
-          response = response.filter((deal) => deal.deal_salesrank !== 999999999);
-        }
+        console.log(filters);
+        let response = await fetchDeals(filters);
 
         setDeals(response);
       } catch (error) {
         console.error("Error fetching deals:", error);
       }
+      setLoading(false);
     };
 
-    fetchDeals();
+    fetch();
   }, [filters]);
 
+  const handleClickOpen = async (deal) => {
+    const credit = await fetchCredit();
+    console.log("credit", credit);
+    const newDealDetails = await checkDeal(deal);
+    console.log("newDealDetails", newDealDetails);
+
+    setSelectedDeal(deal);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedDeal(null);
+  };
+
+  // Definición de las columnas con flex
+  const columns = [
+    { headerName: "Category", field: "deal_productGroup", filter: true, flex: 1 },
+    {
+      headerName: "Date",
+      field: "deal_date",
+      valueFormatter: (params) =>
+        params.value ? new Date(params.value).toLocaleDateString() : "N/A",
+      flex: 1,
+    },
+    {
+      headerName: "Price at source",
+      field: "deal_priceSource",
+      valueFormatter: (params) =>
+        params.value !== undefined ? `$${params.value.toFixed(2)}` : "N/A",
+      flex: 1,
+    },
+    {
+      headerName: "Price at Amazon",
+      field: "deal_priceAmazon",
+      valueFormatter: (params) =>
+        params.value !== undefined ? `$${params.value.toFixed(2)}` : "N/A",
+      flex: 1,
+    },
+    {
+      headerName: "FBA fees",
+      field: "deal_fbaFees",
+      valueFormatter: (params) =>
+        params.value !== undefined ? `$${params.value.toFixed(2)}` : "N/A",
+      flex: 1,
+    },
+    {
+      headerName: "90-avg Sales rank",
+      field: "deal_salesrank",
+      valueFormatter: (params) =>
+        params.value !== undefined && params.value !== 999999999 ? params.value : "No sales rank",
+      flex: 1,
+    },
+    {
+      headerName: "Profit",
+      field: "deal_profit",
+      cellRenderer: (params) =>
+        params.value !== undefined ? (
+          <span style={{ color: params.value >= 0 ? "green" : "red" }}>{`$${params.value.toFixed(
+            2
+          )}`}</span>
+        ) : (
+          "N/A"
+        ),
+      flex: 1,
+    },
+    {
+      headerName: "ROI %",
+      field: "deal_roi",
+      valueFormatter: (params) =>
+        params.value !== undefined ? `${params.value.toFixed(2)} %` : "N/A",
+      flex: 1,
+    },
+    {
+      headerName: "Show",
+      field: "actions",
+      cellRenderer: (params) => {
+        const deal = params.data;
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "8px" }}>
+            {/* Botón de visibilidad */}
+            <IconButton onClick={() => handleClickOpen(deal)} style={{ padding: "0px" }}>
+              <Tooltip title="Click here to show the details of this deal">
+                <Visibility fontSize="small" color="primary" />
+              </Tooltip>
+            </IconButton>
+
+            {/* Condicional para candado cerrado o abierto */}
+            {deal.deal_gatedByDefault ? (
+              <Tooltip title="This category needs Amazon approval in order to sell">
+                <Lock style={{ color: "red" }} />
+              </Tooltip>
+            ) : (
+              <LockOpen style={{ color: "green" }} />
+            )}
+
+            {/* Condicional para pack */}
+            {deal.deal_pack && (
+              <Tooltip title="Potential mismatch (since the product at Amazon has the word -pack- in its title)">
+                <Warning style={{ color: "orange" }} />
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
+      flex: 1,
+    },
+  ];
+
+  // Función para auto-ajustar las columnas
+  const onGridReady = useCallback((params) => {
+    params.api.sizeColumnsToFit();
+  }, []);
+
   return (
-    <TableContainer component={Paper} sx={{ mt: 3 }}>
-      <Typography variant="h6" sx={{ margin: 2 }}>
-        Deals Table
-      </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Category</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Price at source</TableCell>
-            <TableCell>Price at Amazon</TableCell>
-            <TableCell>FBA fees</TableCell>
-            <TableCell>90-avg Sales rank</TableCell>
-            <TableCell>Profit</TableCell>
-            <TableCell>ROI %</TableCell>
-            <TableCell>Show</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {deals.map((deal) => (
-            <TableRow key={deal.deal_id}>
-              <TableCell>{deal.deal_productGroup || "N/A"}</TableCell>
-              <TableCell>
-                {deal.deal_date ? new Date(deal.deal_date).toLocaleDateString() : "N/A"}
-              </TableCell>
-              <TableCell>
-                {deal.deal_priceSource !== undefined
-                  ? `$${deal.deal_priceSource.toFixed(2)}`
-                  : "N/A"}
-              </TableCell>
-              <TableCell>
-                {deal.deal_priceAmazon !== undefined
-                  ? `$${deal.deal_priceAmazon.toFixed(2)}`
-                  : "N/A"}
-              </TableCell>
-              <TableCell>
-                {deal.deal_fbaFees !== undefined ? `$${deal.deal_fbaFees.toFixed(2)}` : "N/A"}
-              </TableCell>
-              <TableCell>{deal.deal_salesrank || "N/A"}</TableCell>
-              <TableCell sx={{ color: deal.deal_profit >= 0 ? "green" : "red" }}>
-                {deal.deal_profit !== undefined ? `$${deal.deal_profit.toFixed(2)}` : "N/A"}
-              </TableCell>
-              <TableCell>
-                {deal.deal_roi !== undefined ? `${deal.deal_roi.toFixed(2)} %` : "N/A"}
-              </TableCell>
-              <TableCell>
-                <IconButton color="primary">
-                  <Visibility />
-                </IconButton>
-                {deal.deal_gatedByDefault ? (
-                  <IconButton color="secondary">
-                    <Lock />
-                  </IconButton>
-                ) : (
-                  <IconButton color="warning">
-                    <Warning />
-                  </IconButton>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Grid container p={2}>
+      {loading ? (
+        <Grid item xs={12} container justifyContent="center" alignItems="center">
+          <CircularProgress size={30} />
+        </Grid>
+      ) : (
+        deals &&
+        deals.length !== 0 && (
+          <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
+            <AgGridReact
+              rowData={deals}
+              columnDefs={columns}
+              pagination={true}
+              paginationPageSize={20}
+              domLayout="autoHeight"
+              onGridReady={onGridReady} // Autoajusta las columnas al estar listas
+            />
+          </div>
+        )
+      )}
+      {selectedDeal && (
+        <DealDetails
+          openModal={openModal}
+          handleCloseModal={handleCloseModal}
+          selectedDeal={selectedDeal}
+        />
+      )}
+    </Grid>
   );
 };
 
-// Props validation
+// Validación de props
 TableDeals.propTypes = {
   filters: PropTypes.shape({
     category: PropTypes.string,

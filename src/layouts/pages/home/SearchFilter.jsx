@@ -18,7 +18,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Search, FilterList, AttachMoney, Percent } from "@mui/icons-material";
-import client from "ApiClient";
+import client from "services/ApiClient";
 
 // Función para obtener y actualizar los datos de la API cada hora
 const fetchAndStoreDeals = async () => {
@@ -96,13 +96,13 @@ const SearchFilter = ({ onFiltersChange }) => {
       <Card>
         <CardHeader
           title={
-            <Typography variant="h6" color="white">
+            <Typography variant="h6" color="#FFFFFF">
               Search Filter
             </Typography>
           }
-          sx={{ backgroundColor: "#455a64" }}
+          sx={{ backgroundColor: "#735AC7" }}
         />
-        <CardContent>
+        <CardContent style={{ paddingTop: "1.5%" }}>
           <Grid container spacing={2} alignItems="center">
             {/* Category Filter */}
             <Grid item xs={12} md={6}>
@@ -142,6 +142,8 @@ const SearchFilter = ({ onFiltersChange }) => {
                   <MenuItem value="-14">Last two weeks</MenuItem>
                   <MenuItem value="-30">Last month</MenuItem>
                   <MenuItem value="-90">Last three months</MenuItem>
+                  <MenuItem value="-180">Last six months</MenuItem>
+                  <MenuItem value="-365">Last year</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -234,8 +236,8 @@ const SearchFilter = ({ onFiltersChange }) => {
                   color="primary"
                   size="large"
                   sx={{
-                    backgroundColor: "#455a64",
-                    color: "white",
+                    backgroundColor: "#735AC7",
+                    color: "#AAAAAA",
                     padding: 2,
                     borderRadius: "50%",
                   }}

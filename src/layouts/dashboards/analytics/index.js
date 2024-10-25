@@ -32,7 +32,7 @@ import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatist
 import SalesByCountry from "layouts/dashboards/analytics/components/SalesByCountry";
 
 // ApiClient
-import client from "ApiClient";
+import client from "services/ApiClient";
 
 import { useEffect, useState } from "react";
 import DefaultLineChart from "examples/Charts/LineCharts/DefaultLineChart";
@@ -95,13 +95,13 @@ function Analytics() {
   };
 
   useEffect(() => {
-   // getPages();
-   // getData();
-   // planInformation();
+    // getPages();
+    // getData();
+    // planInformation();
   }, []);
 
   useEffect(() => {
-   // getData();
+    // getData();
   }, [selectedPage]);
 
   useEffect(() => {

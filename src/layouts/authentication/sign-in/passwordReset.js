@@ -24,13 +24,13 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 // @mui material components
 import PasswordChecklist from "react-password-checklist";
 import bcrypt from "bcryptjs-react";
-import client from "ApiClient";
+import client from "services/ApiClient";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
-// import client from "ApiClient";
+// import client from "services/ApiClient";
 // import md5 from "md5";
 import { Grid } from "@mui/material";
 import { IconButton, InputAdornment, Tooltip } from "@material-ui/core";

@@ -23,7 +23,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 // import axios from "axios";
-import client from "ApiClient";
+import client from "services/ApiClient";
 
 import { Grid } from "@mui/material";
 import { Card, Chip, Divider } from "@material-ui/core";

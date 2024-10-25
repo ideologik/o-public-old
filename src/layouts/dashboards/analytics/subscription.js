@@ -23,7 +23,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 // import axios from "axios";
-import client from "ApiClient";
+import client from "services/ApiClient";
 
 import { Dialog, DialogActions, DialogContent, Grid } from "@mui/material";
 import { Card, Chip, Divider } from "@material-ui/core";
@@ -63,7 +63,7 @@ function Subscription(props) {
       .request(options)
       .then((response) => {
         let cntValue = 0;
-        let arrContacts = [];      
+        let arrContacts = [];
         const filterResponse = response.filter((item) => item.contacts > props.plan.contactsLimit);
         setAcconuntsData(filterResponse);
         let arrResponse = Array.from(new Set(filterResponse.map((item) => item.contacts)));

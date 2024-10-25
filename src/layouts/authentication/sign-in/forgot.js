@@ -24,7 +24,7 @@ import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 import MDSnackbar from "components/MDSnackbar";
 // Images
-import client from "ApiClient";
+import client from "services/ApiClient";
 
 import { Grid } from "@mui/material";
 import MSLeftPanel from "components/MSLeftPanel/MSLeftPanel";
@@ -127,12 +127,7 @@ function Forgot() {
             </MDBox>
 
             <MDBox mt={4} mb={1}>
-              <MDButton
-                variant="gradient"
-                color="primary"
-                fullWidth
-                onClick={handleLogin}
-              >
+              <MDButton variant="gradient" color="primary" fullWidth onClick={handleLogin}>
                 Recover password
               </MDButton>
             </MDBox>

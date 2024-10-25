@@ -14,7 +14,7 @@ Coded by www.creative-tim.com
 */
 
 import { useState, useEffect } from "react";
-import client from "ApiClient";
+import client from "services/ApiClient";
 // react-github-btn
 // @mui material components
 import Divider from "@mui/material/Divider";

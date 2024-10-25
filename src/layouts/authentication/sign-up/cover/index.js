@@ -19,7 +19,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 // @mui material components
 import Card from "@mui/material/Card";
 import Checkbox from "@mui/material/Checkbox";
-import client from "ApiClient";
+import client from "services/ApiClient";
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";

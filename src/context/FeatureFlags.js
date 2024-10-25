@@ -1,4 +1,4 @@
-import client from "ApiClient";
+import client from "services/ApiClient";
 import rgba from "assets/theme/functions/rgba";
 import React from "react";
 
@@ -18,15 +18,15 @@ export function FeatureFlagsProvider({ children }) {
   });
 
   /*SENDPAD*/
-  switch (process.env.REACT_APP_PLNAME) {   
+  switch (process.env.REACT_APP_PLNAME) {
     case "funnelsense":
       features.plName = "funnelsense";
       features.hiddenMenus = [];
-      features.colorBackground = rgba("#337AB0",0.1);
+      features.colorBackground = rgba("#337AB0", 0.1);
       features.colorPrimary = "#337AB0";
       features.colorPrimaryFocus = "#337AB0";
       features.colorPrimaryGradient = "#337AB0";
-      features.colorPrimaryGradientState = "#3352B0";     
+      features.colorPrimaryGradientState = "#3352B0";
       break;
   }
 

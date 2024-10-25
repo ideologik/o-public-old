@@ -3,7 +3,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import MDBox from "components/MDBox";
 import { CircularProgress, Grid } from "@mui/material";
 import { Card, LinearProgress, TableCell } from "@material-ui/core";
-import client from "ApiClient";
+import client from "services/ApiClient";
 import MDTypography from "components/MDTypography";
 import { useContext, useEffect, useState } from "react";
 import moment from "moment";

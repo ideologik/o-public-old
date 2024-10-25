@@ -23,7 +23,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 // import axios from "axios";
-import client from "ApiClient";
+import client from "services/ApiClient";
 
 import { Dialog, DialogActions, DialogContent, Grid } from "@mui/material";
 import { Card, Chip, Divider } from "@material-ui/core";
@@ -218,7 +218,7 @@ function Subscription(props) {
           >
             <MDBox mt={10} display="flex" justifyContent="center">
               <MDTypography variant="h2" fontWeight="medium" mb={2}>
-              {process.env.REACT_APP_SITE_TITLE} Standard Plan
+                {process.env.REACT_APP_SITE_TITLE} Standard Plan
               </MDTypography>
             </MDBox>
             <MDBox mt={10} display="flex" justifyContent="center">

@@ -37,7 +37,7 @@ import bgImage from "assets/images/illustrations/illustration-verification.jpg";
 import { IconButton, InputAdornment, Tooltip } from "@mui/material";
 
 // ApiClient
-import client from "ApiClient";
+import client from "services/ApiClient";
 import MDSnackbar from "components/MDSnackbar";
 
 function Illustration() {
