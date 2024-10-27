@@ -24,10 +24,51 @@ export const fetchDeals = async (filters) => {
 
 export const checkDeal = async (deal) => {
   try {
-    const response = await client.post(`deals/checkdeal}`, deal);
+    const response = await client.post("deals/checkdeal", deal);
     return response;
   } catch (error) {
     console.error("Error fetching deal details:", error);
     throw new Error("Error fetching deal details");
+  }
+};
+
+export const unlockDeal = async (deal_id) => {
+  try {
+    const response = await client.get("deals/unlock", { params: { deal_id } });
+    return response;
+  } catch (error) {
+    console.error("Error unlocking deal:", error);
+    throw new Error("Error unlocking deal");
+  }
+};
+
+export const reportDeal = async (deal_id, notes) => {
+  try {
+    const response = await client.get("deals/report", { params: { usd_id: deal_id, notes } });
+    return response;
+  } catch (error) {
+    console.error("Error reporting deal:", error);
+    throw new Error("Error reporting deal");
+  }
+};
+
+export const fetchUserDeals = async () => {
+  try {
+    const response = await client.get("deals/userdeals");
+    return response;
+  } catch (error) {
+    console.error("Error fetching user deals:", error);
+    throw new Error("Error fetching user deals");
+  }
+};
+
+export const fetchUserDealByDealId = async (deal_id) => {
+  try {
+    const response = await fetchUserDeals();
+    const deal = response.find((userDeal) => userDeal.deal.deal_id === deal_id);
+    return deal;
+  } catch (error) {
+    console.error("Error fetching user deal:", error);
+    throw new Error("Error fetching user deal");
   }
 };
