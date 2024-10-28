@@ -4,15 +4,20 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import PropTypes from "prop-types";
 import { Visibility, Lock, Warning, LockOpen } from "@mui/icons-material";
-import { CircularProgress, Grid, IconButton, Tooltip } from "@mui/material";
 import {
-  fetchDeals,
-  fetchCredit,
-  checkDeal,
-  unlockDeal,
-  fetchUserDealByDealId,
-  reportDeal,
-} from "services";
+  CircularProgress,
+  Grid,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Button,
+  Snackbar,
+} from "@mui/material";
+import MDAlert from "components/MDAlert";
+import { fetchDeals, fetchCredit, checkDeal, unlockDeal } from "services";
 import DealDetails from "./DealDetails";
 
 const TableDeals = ({ filters }) => {
@@ -21,43 +26,101 @@ const TableDeals = ({ filters }) => {
   const [modalLoading, setModalLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchDealsData = async () => {
       setLoading(true);
       try {
-        console.log(filters);
-        let response = await fetchDeals(filters);
+        const response = await fetchDeals(filters);
         setDeals(response);
       } catch (error) {
         console.error("Error fetching deals:", error);
       }
       setLoading(false);
     };
-
-    fetch();
+    fetchDealsData();
   }, [filters]);
 
-  const handleClickOpen = async (deal) => {
-    setModalLoading(true);
+  const handleTripleCheck = async (deal) => {
+    console.log("deal", deal);
+    const credit = await fetchCredit();
+
+    if (credit < 1) {
+      alert("You do not have enough credits to proceed.");
+      return; // Detiene la ejecución si no hay crédito suficiente
+    }
+    setSnackbarMessage(
+      "We are triple checking that the UPC code, source price and amazon prime price are still the same. Give us a couple seconds please...."
+    );
+    setAlertOpen(true);
+
+    const newDeal = await checkDeal(deal);
+    console.log("newDeal", newDeal);
+
+    setAlertOpen(false);
+    setSnackbarMessage("");
+
+    let message = "";
+    let title = "";
+    let change = false;
+
+    // Compara precios de Amazon y ajusta si es necesario
+    if (deal.deal_priceAmazon !== newDeal.deal_priceAmazon) {
+      title = deal.deal_priceAmazon > newDeal.deal_priceAmazon ? "Warning!" : "Good News!";
+      message += `Amazon price has changed from ${deal.deal_priceAmazon} to ${newDeal.deal_priceAmazon}. `;
+      change = true;
+    }
+
+    // Compara el ranking de ventas
+    if (deal.deal_salesrank !== newDeal.deal_salesrank) {
+      title = deal.deal_salesrank > newDeal.deal_salesrank ? "Good News!" : "Warning:";
+      message += `Sales rank has changed from ${deal.deal_salesrank} to ${newDeal.deal_salesrank}. `;
+      change = true;
+    }
+
+    // Verifica la rentabilidad actual (DOA)
+    const currentDOA = newDeal.deal_priceAmazon - newDeal.deal_priceSource - newDeal.deal_fbaFees;
+    if (currentDOA <= 0) {
+      message = "This deal is no longer profitable and has been marked as invalid." + currentDOA;
+      alert(message);
+      return;
+    }
+
+    // Si hubo cambios, confirma con el usuario
+    if (change) {
+      message =
+        title +
+        message +
+        "Do you still wish to proceed and unlock the full information for this deal?";
+      setSnackbarMessage(message);
+      setConfirmOpen(true);
+    } else {
+      // Si no hubo cambios, desbloquea directamente
+      await handleUnlockDeal(newDeal);
+    }
+  };
+
+  const handleUnlockDeal = async (deal) => {
     try {
-      const credit = await fetchCredit();
-      console.log("credit", credit);
-      const newDealDetails = await checkDeal(deal);
-      console.log("newDealDetails", newDealDetails);
-      const unlockResponse = await unlockDeal(deal.deal_id);
-      console.log("unlockResponse", unlockResponse);
-      const userDeal = await fetchUserDealByDealId(deal.deal_id);
-      console.log("userDeal", userDeal);
-
-      const reportresponse = await reportDeal(userDeal.usd_id, "notes");
-      console.log("reportresponse", reportresponse);
-
+      await unlockDeal(deal.deal_id);
       setSelectedDeal(deal);
       setOpenModal(true);
     } catch (error) {
-      console.error("Error fetching deal details:", error);
+      console.error("Error unlocking deal:", error);
     }
+  };
+
+  const handleConfirm = async () => {
+    setConfirmOpen(false);
+    await handleUnlockDeal(selectedDeal);
+  };
+
+  const handleClickOpen = async (deal) => {
+    setModalLoading(true);
+    await handleTripleCheck(deal);
     setModalLoading(false);
   };
 
@@ -66,7 +129,11 @@ const TableDeals = ({ filters }) => {
     setSelectedDeal(null);
   };
 
-  // Definición de las columnas con flex
+  const handleCloseAlert = () => {
+    setAlertOpen(false);
+  };
+
+  // Column definitions
   const columns = [
     { headerName: "Category", field: "deal_productGroup", filter: true, flex: 1 },
     {
@@ -129,7 +196,6 @@ const TableDeals = ({ filters }) => {
       field: "actions",
       cellRenderer: (params) => {
         const deal = params.data;
-
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "8px" }}>
             <IconButton onClick={() => handleClickOpen(deal)} style={{ padding: "0px" }}>
@@ -137,20 +203,12 @@ const TableDeals = ({ filters }) => {
                 <Visibility fontSize="small" color="primary" />
               </Tooltip>
             </IconButton>
-
             {deal.deal_gatedByDefault ? (
-              <Tooltip title="This category needs Amazon approval in order to sell">
-                <Lock style={{ color: "red" }} />
-              </Tooltip>
+              <Lock style={{ color: "red" }} />
             ) : (
               <LockOpen style={{ color: "green" }} />
             )}
-
-            {deal.deal_pack && (
-              <Tooltip title="Potential mismatch (since the product at Amazon has the word -pack- in its title)">
-                <Warning style={{ color: "orange" }} />
-              </Tooltip>
-            )}
+            {deal.deal_pack && <Warning style={{ color: "orange" }} />}
           </div>
         );
       },
@@ -169,8 +227,7 @@ const TableDeals = ({ filters }) => {
           <CircularProgress size={30} />
         </Grid>
       ) : (
-        deals &&
-        deals.length !== 0 && (
+        deals.length > 0 && (
           <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
             <AgGridReact
               rowData={deals}
@@ -183,7 +240,8 @@ const TableDeals = ({ filters }) => {
           </div>
         )
       )}
-      {modalLoading ? (
+
+      {modalLoading && (
         <div
           style={{
             position: "fixed",
@@ -202,20 +260,38 @@ const TableDeals = ({ filters }) => {
         >
           <CircularProgress size={40} />
         </div>
-      ) : (
-        selectedDeal && (
-          <DealDetails
-            openModal={openModal}
-            handleCloseModal={handleCloseModal}
-            selectedDeal={selectedDeal}
-          />
-        )
       )}
+
+      {selectedDeal && (
+        <DealDetails
+          openModal={openModal}
+          handleCloseModal={handleCloseModal}
+          selectedDeal={selectedDeal}
+        />
+      )}
+
+      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleCloseAlert}>
+        <MDAlert onClose={handleCloseAlert} severity="info" sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </MDAlert>
+      </Snackbar>
+
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogContent>
+          <DialogContentText>{snackbarMessage}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={handleConfirm} color="primary">
+            Yes, proceed
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
 
-// Validación de props
+// Prop validation
 TableDeals.propTypes = {
   filters: PropTypes.shape({
     category: PropTypes.string,
