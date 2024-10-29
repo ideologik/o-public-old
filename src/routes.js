@@ -57,6 +57,7 @@ import MDAvatar from "components/MDAvatar";
 import Icon from "@mui/material/Icon";
 import Home from "layouts/pages/home/Home";
 import MyDeals from "layouts/pages/my-deals/MyDeals";
+import MyDealDetails from "layouts/pages/my-deal-details/MyDealDetails";
 import Support from "layouts/pages/support/Support";
 
 // Images
@@ -100,6 +101,12 @@ const routes = [
     icon: <Icon>shopping_cart</Icon>, // Ícono de MUI para Deals
     route: "/my-deals",
     component: <MyDeals />,
+    noCollapse: true,
+  },
+  {
+    route: "/my-deal-details",
+    name: "My Deal Details",
+    component: <MyDealDetails />,
     noCollapse: true,
   },
   {

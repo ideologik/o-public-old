@@ -14,9 +14,8 @@ import {
   DialogContent,
   DialogContentText,
   Button,
-  Snackbar,
 } from "@mui/material";
-import MDAlert from "components/MDAlert";
+import MDSnackbar from "components/MDSnackbar";
 import { fetchDeals, fetchCredit, checkDeal, unlockDeal } from "services";
 import DealDetails from "./DealDetails";
 
@@ -27,14 +26,19 @@ const TableDeals = ({ filters }) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    open: false,
+    message: "",
+    color: "info",
+    dismissible: false,
+  });
 
   useEffect(() => {
     const fetchDealsData = async () => {
       setLoading(true);
       try {
         const response = await fetchDeals(filters);
+        console.log(response);
         setDeals(response);
       } catch (error) {
         console.error("Error fetching deals:", error);
@@ -44,24 +48,57 @@ const TableDeals = ({ filters }) => {
     fetchDealsData();
   }, [filters]);
 
+  const handleAlertOpen = (message, color = "info", dismissible = false) => {
+    setAlertProps({ open: true, message, color, dismissible });
+  };
+
+  const handleAlertClose = () => {
+    setAlertProps((prev) => ({ ...prev, open: false }));
+  };
+
   const handleTripleCheck = async (deal) => {
-    console.log("deal", deal);
     const credit = await fetchCredit();
+    console.log("credit", credit);
+    console.log(deal);
 
     if (credit < 1) {
-      alert("You do not have enough credits to proceed.");
-      return; // Detiene la ejecución si no hay crédito suficiente
+      handleAlertOpen("You do not have enough credits to proceed.", "warning", false);
+      return;
     }
-    setSnackbarMessage(
-      "We are triple checking that the UPC code, source price and amazon prime price are still the same. Give us a couple seconds please...."
-    );
-    setAlertOpen(true);
+
+    setAlertProps({
+      open: true,
+      message:
+        "We are triple checking that the UPC code, source price, and Amazon prime price are still the same. Please wait a moment...",
+      color: "info",
+      dismissible: false,
+    });
 
     const newDeal = await checkDeal(deal);
     console.log("newDeal", newDeal);
+    if (newDeal === null) {
+      handleAlertOpen(
+        "This deal is no longer profitable and has been marked as invalid.",
+        "error",
+        true
+      );
+      setDeals((prev) => prev.filter((d) => d.deal_id !== deal.deal_id));
+      return;
+    }
 
-    setAlertOpen(false);
-    setSnackbarMessage("");
+    handleAlertClose();
+    // Verifica la rentabilidad actual (DOA)
+    const currentDOA = newDeal.deal_priceAmazon - newDeal.deal_priceSource - newDeal.deal_fbaFees;
+    if (currentDOA <= 0) {
+      console.log("currentDOA", currentDOA);
+      handleAlertOpen(
+        "This deal is no longer profitable and has been marked as invalid.",
+        "error",
+        true
+      );
+      setDeals((prev) => prev.filter((d) => d.deal_id !== deal.deal_id));
+      return;
+    }
 
     let message = "";
     let title = "";
@@ -69,6 +106,7 @@ const TableDeals = ({ filters }) => {
 
     // Compara precios de Amazon y ajusta si es necesario
     if (deal.deal_priceAmazon !== newDeal.deal_priceAmazon) {
+      console.log("precio distinto", deal.deal_priceAmazon, newDeal.deal_priceAmazon);
       title = deal.deal_priceAmazon > newDeal.deal_priceAmazon ? "Warning!" : "Good News!";
       message += `Amazon price has changed from ${deal.deal_priceAmazon} to ${newDeal.deal_priceAmazon}. `;
       change = true;
@@ -76,17 +114,10 @@ const TableDeals = ({ filters }) => {
 
     // Compara el ranking de ventas
     if (deal.deal_salesrank !== newDeal.deal_salesrank) {
+      console.log("sales rank distinto", deal.deal_salesrank, newDeal.deal_salesrank);
       title = deal.deal_salesrank > newDeal.deal_salesrank ? "Good News!" : "Warning:";
       message += `Sales rank has changed from ${deal.deal_salesrank} to ${newDeal.deal_salesrank}. `;
       change = true;
-    }
-
-    // Verifica la rentabilidad actual (DOA)
-    const currentDOA = newDeal.deal_priceAmazon - newDeal.deal_priceSource - newDeal.deal_fbaFees;
-    if (currentDOA <= 0) {
-      message = "This deal is no longer profitable and has been marked as invalid." + currentDOA;
-      alert(message);
-      return;
     }
 
     // Si hubo cambios, confirma con el usuario
@@ -95,17 +126,26 @@ const TableDeals = ({ filters }) => {
         title +
         message +
         "Do you still wish to proceed and unlock the full information for this deal?";
-      setSnackbarMessage(message);
+      setAlertProps({
+        open: true,
+        message,
+        color: title === "Warning!" ? "warning" : "success",
+        dismissible: true,
+      });
       setConfirmOpen(true);
     } else {
       // Si no hubo cambios, desbloquea directamente
+      // Cada vez que se desbloque al mismo deal, se genera una nueva entrada en la tabla
+      // Esto está bien?
       await handleUnlockDeal(newDeal);
+      setDeals((prev) => prev.filter((d) => d.deal_id !== deal.deal_id));
     }
   };
 
   const handleUnlockDeal = async (deal) => {
     try {
       await unlockDeal(deal.deal_id);
+      handleAlertOpen("1 credit are deducted from your account.", "info", false);
       setSelectedDeal(deal);
       setOpenModal(true);
     } catch (error) {
@@ -114,12 +154,14 @@ const TableDeals = ({ filters }) => {
   };
 
   const handleConfirm = async () => {
+    setDeals((prev) => prev.filter((d) => d.deal_id !== selectedDeal.deal_id));
     setConfirmOpen(false);
     await handleUnlockDeal(selectedDeal);
   };
 
   const handleClickOpen = async (deal) => {
     setModalLoading(true);
+    setSelectedDeal(deal);
     await handleTripleCheck(deal);
     setModalLoading(false);
   };
@@ -127,10 +169,6 @@ const TableDeals = ({ filters }) => {
   const handleCloseModal = () => {
     setOpenModal(false);
     setSelectedDeal(null);
-  };
-
-  const handleCloseAlert = () => {
-    setAlertOpen(false);
   };
 
   // Column definitions
@@ -173,7 +211,7 @@ const TableDeals = ({ filters }) => {
     },
     {
       headerName: "Profit",
-      field: "deal_profit",
+      field: "deal_doa",
       cellRenderer: (params) =>
         params.value !== undefined ? (
           <span style={{ color: params.value >= 0 ? "green" : "red" }}>{`$${params.value.toFixed(
@@ -204,7 +242,9 @@ const TableDeals = ({ filters }) => {
               </Tooltip>
             </IconButton>
             {deal.deal_gatedByDefault ? (
-              <Lock style={{ color: "red" }} />
+              <Tooltip title="This category needs Amazon approval in order to sell">
+                <Lock style={{ color: "red" }} />
+              </Tooltip>
             ) : (
               <LockOpen style={{ color: "green" }} />
             )}
@@ -215,7 +255,6 @@ const TableDeals = ({ filters }) => {
       flex: 1,
     },
   ];
-
   const onGridReady = useCallback((params) => {
     params.api.sizeColumnsToFit();
   }, []);
@@ -270,15 +309,21 @@ const TableDeals = ({ filters }) => {
         />
       )}
 
-      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleCloseAlert}>
-        <MDAlert onClose={handleCloseAlert} severity="info" sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </MDAlert>
-      </Snackbar>
+      <MDSnackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        color={alertProps.color}
+        icon="notifications"
+        title="Notification"
+        content={alertProps.message}
+        open={alertProps.open}
+        close={handleAlertClose}
+        autoHideDuration={1000}
+        style={{ zIndex: 99999 }}
+      />
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogContent>
-          <DialogContentText>{snackbarMessage}</DialogContentText>
+          <DialogContentText>{alertProps.message}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
@@ -291,7 +336,6 @@ const TableDeals = ({ filters }) => {
   );
 };
 
-// Prop validation
 TableDeals.propTypes = {
   filters: PropTypes.shape({
     category: PropTypes.string,

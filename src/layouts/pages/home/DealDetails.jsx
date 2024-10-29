@@ -1,21 +1,32 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   Typography,
   Divider,
 } from "@mui/material";
 import MDBox from "components/MDBox"; // Componente del template Material Dashboard
+import MDButton from "components/MDButton"; // Componente del template Material Dashboard
+import { useDeal, setDeal } from "context/DealContext";
 
 const DealDetails = ({ selectedDeal, openModal, handleCloseModal }) => {
   console.log("selectedDeal", selectedDeal);
+  const { state, dispatch } = useDeal();
+  const navigate = useNavigate();
+
+  const handleClickFullDetails = () => {
+    setDeal(dispatch, selectedDeal);
+    navigate("/my-deal-details");
+  };
   return (
     <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="md">
-      <DialogTitle style={{ textAlign: "center" }}>Deal Details</DialogTitle>
+      <DialogTitle style={{ textAlign: "center", backgroundColor: "#735AC7", color: "#FFFFFF" }}>
+        Deal Details
+      </DialogTitle>
       <DialogContent dividers>
         <MDBox p={3}>
           <MDBox mb={2}>
@@ -41,7 +52,7 @@ const DealDetails = ({ selectedDeal, openModal, handleCloseModal }) => {
           <Divider />
           <MDBox mb={2}>
             <Typography variant="h6">Profit</Typography>
-            <Typography variant="body2">${selectedDeal.deal_profit.toFixed(2)}</Typography>
+            <Typography variant="body2">${selectedDeal.deal_doa.toFixed(2)}</Typography>
           </MDBox>
           <Divider />
           <MDBox mb={2}>
@@ -82,12 +93,12 @@ const DealDetails = ({ selectedDeal, openModal, handleCloseModal }) => {
       </DialogContent>
       <DialogActions>
         <MDBox flexGrow={1} />
-        <Button onClick={handleCloseModal} variant="contained">
+        <MDButton onClick={handleCloseModal} variant="contained">
           Close
-        </Button>
-        <Button variant="contained" color="primary">
+        </MDButton>
+        <MDButton variant="contained" color="primary" onClick={handleClickFullDetails}>
           Full Details
-        </Button>
+        </MDButton>
       </DialogActions>
     </Dialog>
   );
@@ -102,7 +113,7 @@ DealDetails.propTypes = {
     deal_priceSource: PropTypes.number,
     deal_priceAmazon: PropTypes.number,
     deal_salesrank: PropTypes.number,
-    deal_profit: PropTypes.number,
+    deal_doa: PropTypes.number,
     deal_roi: PropTypes.number,
     deal_productGroup: PropTypes.string,
   }),

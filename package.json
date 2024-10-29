@@ -64,10 +64,8 @@
     "yup": "1.1.1"
   },
   "scripts": {
-    "start-omega": "set GENERATE_SOURCEMAP=false && set PORT=80 && set PORT=443 && set HTTPS=true && env-cmd -f .env.omega react-scripts start",
-    "start": "set GENERATE_SOURCEMAP=false && react-scripts start",
-    "build": "set GENERATE_SOURCEMAP=false react-scripts build",
-    "build-omega": "set GENERATE_SOURCEMAP=false && env-cmd -f .env.omega react-scripts build",
+    "start-omega": "dotenv -e .env.omega cross-env PORT=80 HTTPS=true react-scripts start",
+    "build-omega": "dotenv -e .env.omega cross-env react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start"
@@ -95,7 +93,9 @@
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-react": "7.32.2",
-    "prettier": "2.8.8"
+    "prettier": "2.8.8",
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^7.4.2"
   },
   "overrides": {
     "svgo": "3.0.2"

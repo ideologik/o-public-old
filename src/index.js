@@ -21,6 +21,7 @@ import App from "App";
 // Material Dashboard 2 PRO React Context Provider
 import { MaterialUIControllerProvider } from "context";
 import { FeatureFlagsProvider } from "context/FeatureFlags";
+import { DealProvider } from "context/DealContext";
 
 const container = document.getElementById("app");
 const root = createRoot(container);
@@ -29,7 +30,9 @@ root.render(
   <BrowserRouter>
     <MaterialUIControllerProvider>
       <FeatureFlagsProvider>
-        <App />
+        <DealProvider>
+          <App />
+        </DealProvider>
       </FeatureFlagsProvider>
     </MaterialUIControllerProvider>
   </BrowserRouter>
