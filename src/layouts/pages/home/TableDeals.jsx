@@ -110,6 +110,8 @@ const TableDeals = ({ filters }) => {
       title = deal.deal_priceAmazon > newDeal.deal_priceAmazon ? "Warning!" : "Good News!";
       message += `Amazon price has changed from ${deal.deal_priceAmazon} to ${newDeal.deal_priceAmazon}. `;
       change = true;
+      setDeals((prev) => prev.map((d) => (d.deal_id === deal.deal_id ? newDeal : d)));
+      setSelectedDeal(newDeal);
     }
 
     // Compara el ranking de ventas
@@ -118,6 +120,8 @@ const TableDeals = ({ filters }) => {
       title = deal.deal_salesrank > newDeal.deal_salesrank ? "Good News!" : "Warning:";
       message += `Sales rank has changed from ${deal.deal_salesrank} to ${newDeal.deal_salesrank}. `;
       change = true;
+      setDeals((prev) => prev.map((d) => (d.deal_id === deal.deal_id ? newDeal : d)));
+      setSelectedDeal(newDeal);
     }
 
     // Si hubo cambios, confirma con el usuario
