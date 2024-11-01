@@ -1,7 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
 import PropTypes from "prop-types";
 import { Visibility, Lock, Warning, LockOpen } from "@mui/icons-material";
 import {
@@ -18,6 +15,7 @@ import {
 import MDSnackbar from "components/MDSnackbar";
 import { fetchDeals, fetchCredit, checkDeal, unlockDeal } from "services";
 import DealDetails from "./DealDetails";
+import MUIDataTable from "components/MUITableServerPagination/MUITableServerPagination";
 
 const TableDeals = ({ filters }) => {
   const [deals, setDeals] = useState([]);
@@ -32,21 +30,41 @@ const TableDeals = ({ filters }) => {
     color: "info",
     dismissible: false,
   });
+  const [count, setCount] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(0);
+
+  const fetchDealsData = async (currentPage, currentRowsPerPage) => {
+    setLoading(true);
+    try {
+      const response = await fetchDeals({
+        ...filters,
+        page: currentPage,
+        total_rows: currentRowsPerPage,
+      });
+      setDeals(response.data);
+      setCount(response.total_records);
+    } catch (error) {
+      console.error("Error fetching deals:", error);
+    }
+    setLoading(false);
+  };
+
+  const fetchData = async (params) => {
+    return await fetchDeals(params);
+  };
 
   useEffect(() => {
-    const fetchDealsData = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchDeals(filters);
-        console.log(response);
-        setDeals(response);
-      } catch (error) {
-        console.error("Error fetching deals:", error);
-      }
-      setLoading(false);
-    };
-    fetchDealsData();
-  }, [filters]);
+    fetchDealsData(page, rowsPerPage);
+  }, [filters, page, rowsPerPage]);
+
+  const handleTableChange = (action, tableState) => {
+    if (action === "changePage") {
+      setPage(tableState.page);
+    } else if (action === "changeRowsPerPage") {
+      setRowsPerPage(tableState.rowsPerPage);
+    }
+  };
 
   const handleAlertOpen = (message, color = "info", dismissible = false) => {
     setAlertProps({ open: true, message, color, dismissible });
@@ -177,91 +195,92 @@ const TableDeals = ({ filters }) => {
 
   // Column definitions
   const columns = [
-    { headerName: "Category", field: "deal_productGroup", filter: true, flex: 1 },
     {
-      headerName: "Date",
-      field: "deal_date",
-      valueFormatter: (params) =>
-        params.value ? new Date(params.value).toLocaleDateString() : "N/A",
-      flex: 1,
+      name: "deal_productGroup",
+      label: "Category",
+      options: { filter: true, sort: true },
     },
     {
-      headerName: "Price at source",
-      field: "deal_priceSource",
-      valueFormatter: (params) =>
-        params.value !== undefined ? `$${params.value.toFixed(2)}` : "N/A",
-      flex: 1,
-    },
-    {
-      headerName: "Price at Amazon",
-      field: "deal_priceAmazon",
-      valueFormatter: (params) =>
-        params.value !== undefined ? `$${params.value.toFixed(2)}` : "N/A",
-      flex: 1,
-    },
-    {
-      headerName: "FBA fees",
-      field: "deal_fbaFees",
-      valueFormatter: (params) =>
-        params.value !== undefined ? `$${params.value.toFixed(2)}` : "N/A",
-      flex: 1,
-    },
-    {
-      headerName: "90-avg Sales rank",
-      field: "deal_salesrank",
-      valueFormatter: (params) =>
-        params.value !== undefined && params.value !== 999999999 ? params.value : "No sales rank",
-      flex: 1,
-    },
-    {
-      headerName: "Profit",
-      field: "deal_doa",
-      cellRenderer: (params) =>
-        params.value !== undefined ? (
-          <span style={{ color: params.value >= 0 ? "green" : "red" }}>{`$${params.value.toFixed(
-            2
-          )}`}</span>
-        ) : (
-          "N/A"
-        ),
-      flex: 1,
-    },
-    {
-      headerName: "ROI %",
-      field: "deal_roi",
-      valueFormatter: (params) =>
-        params.value !== undefined ? `${params.value.toFixed(2)} %` : "N/A",
-      flex: 1,
-    },
-    {
-      headerName: "Show",
-      field: "actions",
-      cellRenderer: (params) => {
-        const deal = params.data;
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "8px" }}>
-            <IconButton onClick={() => handleClickOpen(deal)} style={{ padding: "0px" }}>
-              <Tooltip title="Click here to show the details of this deal">
-                <Visibility fontSize="small" color="primary" />
-              </Tooltip>
-            </IconButton>
-            {deal.deal_gatedByDefault ? (
-              <Tooltip title="This category needs Amazon approval in order to sell">
-                <Lock style={{ color: "red" }} />
-              </Tooltip>
-            ) : (
-              <LockOpen style={{ color: "green" }} />
-            )}
-            {deal.deal_pack && <Warning style={{ color: "orange" }} />}
-          </div>
-        );
+      name: "deal_date",
+      label: "Date",
+      options: {
+        customBodyRender: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
       },
-      flex: 1,
+    },
+    {
+      name: "deal_priceSource",
+      label: "Price at source",
+      options: {
+        customBodyRender: (value) => (value !== undefined ? `$${value.toFixed(2)}` : "N/A"),
+      },
+    },
+    {
+      name: "deal_priceAmazon",
+      label: "Price at Amazon",
+      options: {
+        customBodyRender: (value) => (value !== undefined ? `$${value.toFixed(2)}` : "N/A"),
+      },
+    },
+    {
+      name: "deal_fbaFees",
+      label: "FBA fees",
+      options: {
+        customBodyRender: (value) => (value !== undefined ? `$${value.toFixed(2)}` : "N/A"),
+      },
+    },
+    {
+      name: "deal_salesrank",
+      label: "90-avg Sales rank",
+      options: {
+        customBodyRender: (value) =>
+          value !== undefined && value !== 999999999 ? value : "No sales rank",
+      },
+    },
+    {
+      name: "deal_doa",
+      label: "Profit",
+      options: {
+        customBodyRender: (value) => (
+          <span style={{ color: value >= 0 ? "green" : "red" }}>
+            {value !== undefined ? `$${value.toFixed(2)}` : "N/A"}
+          </span>
+        ),
+      },
+    },
+    {
+      name: "deal_roi",
+      label: "ROI %",
+      options: {
+        customBodyRender: (value) => (value !== undefined ? `${value.toFixed(2)} %` : "N/A"),
+      },
+    },
+    {
+      name: "actions",
+      label: "Show",
+      options: {
+        customBodyRender: (_, tableMeta) => {
+          const deal = deals[tableMeta.rowIndex];
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <IconButton onClick={() => handleClickOpen(deal)} style={{ padding: "0px" }}>
+                <Tooltip title="Click here to show the details of this deal">
+                  <Visibility fontSize="small" color="primary" />
+                </Tooltip>
+              </IconButton>
+              {deal.deal_gatedByDefault ? (
+                <Tooltip title="This category needs Amazon approval to sell">
+                  <Lock style={{ color: "red" }} />
+                </Tooltip>
+              ) : (
+                <LockOpen style={{ color: "green" }} />
+              )}
+              {deal.deal_pack && <Warning style={{ color: "orange" }} />}
+            </div>
+          );
+        },
+      },
     },
   ];
-  const onGridReady = useCallback((params) => {
-    params.api.sizeColumnsToFit();
-  }, []);
 
   return (
     <Grid container p={2}>
@@ -272,13 +291,11 @@ const TableDeals = ({ filters }) => {
       ) : (
         deals.length > 0 && (
           <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-            <AgGridReact
-              rowData={deals}
-              columnDefs={columns}
-              pagination={true}
-              paginationPageSize={20}
-              domLayout="autoHeight"
-              onGridReady={onGridReady}
+            <MUIDataTable
+              title={"Deals Table"}
+              columns={columns}
+              fetchData={fetchData}
+              filters={filters}
             />
           </div>
         )
