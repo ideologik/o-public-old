@@ -2,13 +2,15 @@
 import client from "services/ApiClient";
 
 export const fetchDeals = async (filters) => {
-  if (!filters || Object.keys(filters).length === 0) return [];
+  console.log("filters", filters, Object.keys(filters));
+  if (!filters || Object.keys(filters).length === 0) return { data: [] };
 
   try {
-    let response = await client.get("deals", { params: filters });
+    const response = await client.get("deals", { params: filters });
     console.log(response);
     if (filters.hideNoSalesRank) {
-      response = response.filter((deal) => deal.deal_salesrank !== 999999999);
+      const data = response.data;
+      response.data = data.filter((deal) => deal.deal_salesrank !== 0);
     }
 
     // response = response.map((deal) => {

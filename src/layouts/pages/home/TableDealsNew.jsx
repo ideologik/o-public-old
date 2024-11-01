@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Visibility, Lock, Warning, LockOpen } from "@mui/icons-material";
 import {
@@ -15,11 +15,9 @@ import {
 import MDSnackbar from "components/MDSnackbar";
 import { fetchDeals, fetchCredit, checkDeal, unlockDeal } from "services";
 import DealDetails from "./DealDetails";
-import MUIDataTable from "mui-datatables";
+import MUITableServerPagination from "components/MUITableServerPagination/MUITableServerPagination";
 
 const TableDeals = ({ filters }) => {
-  const [deals, setDeals] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
@@ -30,35 +28,14 @@ const TableDeals = ({ filters }) => {
     color: "info",
     dismissible: false,
   });
-  const [count, setCount] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [page, setPage] = useState(0);
 
-  const fetchDealsData = async (currentPage, currentRowsPerPage) => {
-    setLoading(true);
+  const fetchData = async (params) => {
     try {
-      const response = await fetchDeals({
-        ...filters,
-        page: currentPage,
-        total_rows: currentRowsPerPage,
-      });
-      setDeals(response.data);
-      setCount(response.total_records);
+      const response = await fetchDeals(params);
+      return { data: response.data || [], total_records: response.total_records || 0 };
     } catch (error) {
       console.error("Error fetching deals:", error);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchDealsData(page, rowsPerPage);
-  }, [filters, page, rowsPerPage]);
-
-  const handleTableChange = (action, tableState) => {
-    if (action === "changePage") {
-      setPage(tableState.page);
-    } else if (action === "changeRowsPerPage") {
-      setRowsPerPage(tableState.rowsPerPage);
+      return { data: [], total_records: 0 };
     }
   };
 
@@ -90,81 +67,24 @@ const TableDeals = ({ filters }) => {
 
     const newDeal = await checkDeal(deal);
     console.log("newDeal", newDeal);
-    if (newDeal === null) {
+    if (!newDeal) {
       handleAlertOpen(
         "This deal is no longer profitable and has been marked as invalid.",
         "error",
         true
       );
-      setDeals((prev) => prev.filter((d) => d.deal_id !== deal.deal_id));
       return;
     }
 
     handleAlertClose();
-    // Verifica la rentabilidad actual (DOA)
-    const currentDOA = newDeal.deal_priceAmazon - newDeal.deal_priceSource - newDeal.deal_fbaFees;
-    if (currentDOA <= 0) {
-      console.log("currentDOA", currentDOA);
-      handleAlertOpen(
-        "This deal is no longer profitable and has been marked as invalid.",
-        "error",
-        true
-      );
-      setDeals((prev) => prev.filter((d) => d.deal_id !== deal.deal_id));
-      return;
-    }
-
-    let message = "";
-    let title = "";
-    let change = false;
-
-    // Compara precios de Amazon y ajusta si es necesario
-    if (deal.deal_priceAmazon !== newDeal.deal_priceAmazon) {
-      console.log("precio distinto", deal.deal_priceAmazon, newDeal.deal_priceAmazon);
-      title = deal.deal_priceAmazon > newDeal.deal_priceAmazon ? "Warning!" : "Good News!";
-      message += `Amazon price has changed from ${deal.deal_priceAmazon} to ${newDeal.deal_priceAmazon}. `;
-      change = true;
-      setDeals((prev) => prev.map((d) => (d.deal_id === deal.deal_id ? newDeal : d)));
-      setSelectedDeal(newDeal);
-    }
-
-    // Compara el ranking de ventas
-    if (deal.deal_salesrank !== newDeal.deal_salesrank) {
-      console.log("sales rank distinto", deal.deal_salesrank, newDeal.deal_salesrank);
-      title = deal.deal_salesrank > newDeal.deal_salesrank ? "Good News!" : "Warning:";
-      message += `Sales rank has changed from ${deal.deal_salesrank} to ${newDeal.deal_salesrank}. `;
-      change = true;
-      setDeals((prev) => prev.map((d) => (d.deal_id === deal.deal_id ? newDeal : d)));
-      setSelectedDeal(newDeal);
-    }
-
-    // Si hubo cambios, confirma con el usuario
-    if (change) {
-      message =
-        title +
-        message +
-        "Do you still wish to proceed and unlock the full information for this deal?";
-      setAlertProps({
-        open: true,
-        message,
-        color: title === "Warning!" ? "warning" : "success",
-        dismissible: true,
-      });
-      setConfirmOpen(true);
-    } else {
-      // Si no hubo cambios, desbloquea directamente
-      // Cada vez que se desbloque al mismo deal, se genera una nueva entrada en la tabla
-      // Esto está bien?
-      await handleUnlockDeal(newDeal);
-      setDeals((prev) => prev.filter((d) => d.deal_id !== deal.deal_id));
-    }
+    setSelectedDeal(newDeal);
+    await handleUnlockDeal(newDeal);
   };
 
   const handleUnlockDeal = async (deal) => {
     try {
       await unlockDeal(deal.deal_id);
-      handleAlertOpen("1 credit are deducted from your account.", "info", false);
-      setSelectedDeal(deal);
+      handleAlertOpen("1 credit deducted from your account.", "info", false);
       setOpenModal(true);
     } catch (error) {
       console.error("Error unlocking deal:", error);
@@ -176,11 +96,10 @@ const TableDeals = ({ filters }) => {
     setConfirmOpen(false);
     await handleUnlockDeal(selectedDeal);
   };
-
-  const handleClickOpen = async (deal) => {
+  const handleClickOpen = (deal) => {
     setModalLoading(true);
     setSelectedDeal(deal);
-    await handleTripleCheck(deal);
+    handleTripleCheck(deal);
     setModalLoading(false);
   };
 
@@ -189,12 +108,10 @@ const TableDeals = ({ filters }) => {
     setSelectedDeal(null);
   };
 
-  // Column definitions
   const columns = [
     {
       name: "deal_productGroup",
       label: "Category",
-      options: { filter: true, sort: true },
     },
     {
       name: "deal_date",
@@ -255,55 +172,32 @@ const TableDeals = ({ filters }) => {
       label: "Show",
       options: {
         customBodyRender: (_, tableMeta) => {
-          const deal = deals[tableMeta.rowIndex];
+          const deal = tableMeta.rowData;
+          if (!deal) return null;
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <IconButton onClick={() => handleClickOpen(deal)} style={{ padding: "0px" }}>
-                <Tooltip title="Click here to show the details of this deal">
+            <div style={{ display: "flex", gap: "8px" }}>
+              <IconButton onClick={() => handleClickOpen(deal)}>
+                <Tooltip title="Show details">
                   <Visibility fontSize="small" color="primary" />
                 </Tooltip>
               </IconButton>
-              {deal.deal_gatedByDefault ? (
-                <Tooltip title="This category needs Amazon approval to sell">
-                  <Lock style={{ color: "red" }} />
-                </Tooltip>
-              ) : (
-                <LockOpen style={{ color: "green" }} />
-              )}
-              {deal.deal_pack && <Warning style={{ color: "orange" }} />}
+              {deal?.gated && <Lock color="error" />}
+              {deal?.pack && <Warning color="warning" />}
             </div>
           );
         },
       },
     },
   ];
-  const options = {
-    serverSide: true,
-    count: count,
-    page: page,
-    rowsPerPage: rowsPerPage,
-    onTableChange: handleTableChange,
-    selectableRows: "none",
-    filter: false,
-    print: false,
-    download: false,
-    search: false,
-    viewColumns: false,
-  };
 
   return (
     <Grid container p={2}>
-      {loading ? (
-        <Grid item xs={12} container justifyContent="center" alignItems="center">
-          <CircularProgress size={30} />
-        </Grid>
-      ) : (
-        deals.length > 0 && (
-          <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-            <MUIDataTable title={"Deals Table"} columns={columns} data={deals} options={options} />
-          </div>
-        )
-      )}
+      <MUITableServerPagination
+        title="Deals Table"
+        columns={columns}
+        fetchData={fetchDealsData}
+        filters={filters}
+      />
 
       {modalLoading && (
         <div
@@ -362,14 +256,7 @@ const TableDeals = ({ filters }) => {
 };
 
 TableDeals.propTypes = {
-  filters: PropTypes.shape({
-    category: PropTypes.string,
-    date: PropTypes.string,
-    salesRank: PropTypes.number,
-    profit: PropTypes.number,
-    roi: PropTypes.number,
-    hideNoSalesRank: PropTypes.bool,
-  }),
+  filters: PropTypes.object,
 };
 
 export default TableDeals;

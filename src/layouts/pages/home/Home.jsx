@@ -11,7 +11,7 @@ function Home() {
   // Función que se pasa a SearchFilter para actualizar los filtros
   const handleFiltersChange = (newFilters) => {
     console.log("filters", newFilters);
-    setFilters(newFilters);
+    setFilters({ ...newFilters, page: 0, total_rows: 10000 });
   };
   return (
     <DashboardLayout>
