@@ -33,9 +33,10 @@ const TableDeals = ({ filters }) => {
   const [count, setCount] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
-
-  const fetchDealsData = async (currentPage, currentRowsPerPage) => {
-    setLoading(true);
+  const fetchDealsData = async (currentPage, currentRowsPerPage, showLoading = false) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       const response = await fetchDeals({
         ...filters,
@@ -47,12 +48,25 @@ const TableDeals = ({ filters }) => {
     } catch (error) {
       console.error("Error fetching deals:", error);
     }
-    setLoading(false);
+    if (showLoading) {
+      setLoading(false);
+    }
   };
 
+  // Este efecto se ejecuta cuando cambian los filtros
   useEffect(() => {
-    fetchDealsData(page, rowsPerPage);
-  }, [filters, page, rowsPerPage]);
+    const fetchData = async () => {
+      await fetchDealsData(0, rowsPerPage, true); // Mostrar loading al cambiar filtros
+    };
+
+    fetchData();
+    setPage(0); // Reinicia la página cuando cambian los filtros
+  }, [filters]);
+
+  // Este efecto se ejecuta cuando cambian la página o las filas por página
+  useEffect(() => {
+    fetchDealsData(page, rowsPerPage); // No mostrar loading al cambiar de página
+  }, [page, rowsPerPage]);
 
   const handleTableChange = (action, tableState) => {
     if (action === "changePage") {
@@ -228,8 +242,7 @@ const TableDeals = ({ filters }) => {
       name: "deal_salesrank",
       label: "90-avg Sales rank",
       options: {
-        customBodyRender: (value) =>
-          value !== undefined && value !== 999999999 ? value : "No sales rank",
+        customBodyRender: (value) => (value !== undefined && value !== 0 ? value : "No sales rank"),
       },
     },
     {
@@ -300,7 +313,7 @@ const TableDeals = ({ filters }) => {
       ) : (
         deals.length > 0 && (
           <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-            <MUIDataTable title={"Deals Table"} columns={columns} data={deals} options={options} />
+            <MUIDataTable title={"Deals"} columns={columns} data={deals} options={options} />
           </div>
         )
       )}
