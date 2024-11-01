@@ -83,7 +83,7 @@ const SearchFilter = ({ onFiltersChange }) => {
       dateFrom: calculateDateFrom(filterDate),
       dateTo: new Date(), // La fecha actual es el `dateTo`
       salesRankTo: salesRank === "" ? undefined : parseInt(salesRank, 10),
-      profitFrom: minProfit === "" ? undefined : parseInt(minProfit, 10),
+      profitFrom: minProfit === "" ? undefined : parseInt(minProfit, 10), // no funciona pasar decimales a la api parseFloat(minProfit).toFixed(2),
       ROIFrom: minRoi === "" ? undefined : parseInt(minRoi, 10),
       hideNoSalesRank,
     };
@@ -105,7 +105,7 @@ const SearchFilter = ({ onFiltersChange }) => {
         <CardContent style={{ paddingTop: "1.5%" }}>
           <Grid container spacing={2} alignItems="center">
             {/* Category Filter */}
-            <Grid item xs={12} md={6}>
+            <Grid item md={6}>
               <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
                 <InputLabel>By category</InputLabel>
                 <Select
@@ -114,6 +114,7 @@ const SearchFilter = ({ onFiltersChange }) => {
                   onChange={(e) => {
                     setSelectedCategory(e.target.value);
                   }}
+                  autoWidth
                   sx={{ height: "56px" }}
                 >
                   <MenuItem value="any">Select Product Type</MenuItem>
@@ -127,7 +128,7 @@ const SearchFilter = ({ onFiltersChange }) => {
             </Grid>
 
             {/* Filter Date */}
-            <Grid item xs={12} md={6}>
+            <Grid item md={6}>
               <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
                 <InputLabel>show only deals from the:</InputLabel>
                 <Select
@@ -152,10 +153,12 @@ const SearchFilter = ({ onFiltersChange }) => {
             <Grid item xs={12} md={4}>
               <FormControl fullWidth variant="outlined">
                 <TextField
+                  type="text"
                   label="Sales Rank"
                   value={salesRank}
                   onChange={(e) => {
-                    setSalesRank(e.target.value);
+                    const newValue = e.target.value.replace(/[^0-9]/g, "");
+                    setSalesRank(newValue);
                   }}
                   InputProps={{
                     startAdornment: (
@@ -165,6 +168,8 @@ const SearchFilter = ({ onFiltersChange }) => {
                     ),
                     endAdornment: <InputAdornment position="end">or less</InputAdornment>,
                     sx: { height: "56px" },
+                    inputMode: "numeric", // Muestra teclado numérico en móviles
+                    pattern: "[0-9]*", // Ayuda a validar en algunos navegadores
                   }}
                 />
               </FormControl>
@@ -174,10 +179,12 @@ const SearchFilter = ({ onFiltersChange }) => {
             <Grid item xs={12} md={4}>
               <FormControl fullWidth variant="outlined">
                 <TextField
+                  type="text"
                   label="Profit"
                   value={minProfit}
                   onChange={(e) => {
-                    setMinProfit(e.target.value);
+                    const newValue = e.target.value.replace(/[^0-9]/g, "");
+                    setMinProfit(newValue);
                   }}
                   InputProps={{
                     startAdornment: (
@@ -187,6 +194,8 @@ const SearchFilter = ({ onFiltersChange }) => {
                     ),
                     endAdornment: <InputAdornment position="end">or greater</InputAdornment>,
                     sx: { height: "56px" },
+                    inputMode: "numeric", // Muestra teclado numérico en móviles
+                    pattern: "[0-9]*", // Ayuda a validar en algunos navegadores
                   }}
                 />
               </FormControl>
@@ -196,10 +205,12 @@ const SearchFilter = ({ onFiltersChange }) => {
             <Grid item xs={12} md={4}>
               <FormControl fullWidth variant="outlined">
                 <TextField
+                  type="text"
                   label="ROI"
                   value={minRoi}
                   onChange={(e) => {
-                    setMinRoi(e.target.value);
+                    const newValue = e.target.value.replace(/[^0-9]/g, "");
+                    setMinRoi(newValue);
                   }}
                   InputProps={{
                     startAdornment: (
@@ -209,6 +220,8 @@ const SearchFilter = ({ onFiltersChange }) => {
                     ),
                     endAdornment: <InputAdornment position="end">or greater</InputAdornment>,
                     sx: { height: "56px" },
+                    inputMode: "numeric", // Muestra teclado numérico en móviles
+                    pattern: "[0-9]*", // Ayuda a validar en algunos navegadores
                   }}
                 />
               </FormControl>
