@@ -9,8 +9,9 @@ import { useDeal, setSelectedProduct } from "context/DealContext";
 
 const SearchResults = () => {
   const { state, dispatch } = useDeal();
+  const selectedProduct = state.selectedProduct;
 
-  console.log("state", state);
+  console.log("selected product", selectedProduct);
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const query = params.get("query");
