@@ -9,7 +9,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import MDButton from "components/MDButton";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
-import { useDeal, setSelectedProduct } from "context/DealCont0ext";
+import { useDeal, setSelectedProduct } from "context/DealContext";
 const getTrendIcon = (current, average) => {
   if (current > average) return <ArrowUpward style={{ color: "green" }} />;
   if (current < average) return <ArrowDownward style={{ color: "red" }} />;
