@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { Card, CardContent, Typography, Grid, CircularProgress, Box } from "@mui/material";
+import { useNavigate } from "react-router-dom"; // Importa useNavigate
 import Slider from "react-slick";
 import MDSnackbar from "components/MDSnackbar";
 import { productsFinder } from "services";
@@ -20,6 +21,7 @@ const CardProducts = ({ filters }) => {
   const [page, setPage] = useState(0);
   const observerRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   const fetchProductsData = async (currentPage, showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -27,9 +29,9 @@ const CardProducts = ({ filters }) => {
       const response = await productsFinder({
         ...filters,
         page: currentPage,
-        total_rows: 10, // Pidiendo 10 productos por página
+        total_rows: 10,
       });
-      setProducts((prev) => [...prev, ...response.data]); // Agregar productos a la lista
+      setProducts((prev) => [...prev, ...response.data]);
     } catch (error) {
       console.error("Error fetching products:", error);
       setAlertProps({
@@ -42,12 +44,11 @@ const CardProducts = ({ filters }) => {
   };
 
   useEffect(() => {
-    setProducts([]); // Limpiar productos al cambiar filtros
+    setProducts([]);
     setPage(0);
     fetchProductsData(0, true);
   }, [filters]);
 
-  // Cargar más productos cuando la página cambia
   useEffect(() => {
     if (page > 0) fetchProductsData(page);
   }, [page]);
@@ -67,21 +68,20 @@ const CardProducts = ({ filters }) => {
   );
 
   const handleSearchAliExpress = (type, title, imageUrl) => {
-    // Implementa la lógica para buscar en AliExpress usando texto o imagen
+    // Redirige a otra ruta con los parámetros adecuados
     if (type === "text") {
-      console.log("Search on AliExpress by text:", title);
+      navigate(`/search?query=${encodeURIComponent(title)}`); // Navega usando el texto
     } else if (type === "image") {
-      console.log("Search on AliExpress by image:", imageUrl);
+      navigate(`/search?imageUrl=${encodeURIComponent(imageUrl)}`); // Navega usando la URL de la imagen
     }
   };
 
   const getImagesArray = (imageURLs) => {
-    if (!imageURLs) return ["/placeholder.jpg"]; // Imagen de respaldo si no hay URLs
-    return imageURLs.split(",").map((url) => url.trim()); // Separar y limpiar las URLs
+    if (!imageURLs) return ["/placeholder.jpg"];
+    return imageURLs.split(",").map((url) => url.trim());
   };
 
   const handleImageChange = (index, productId) => {
-    // Guardar el índice de la imagen actual para el producto específico
     setCurrentImageIndex((prevState) => ({
       ...prevState,
       [productId]: index,

@@ -40,7 +40,6 @@ import Analytics from "layouts/dashboards/analytics";
 import AlreadySubscribed from "layouts/static/alreadySubscribed";
 import ConfirmEmail from "layouts/static/confirmEmail";
 import Thankyou from "layouts/static/thankyou";
-import Billing from "layouts/Billing";
 import Subscription from "layouts/authentication/sign-up/subscription";
 import PasswordReset from "layouts/authentication/sign-in/passwordReset";
 import ForgotDone from "layouts/authentication/sign-in/forgotDone";
@@ -60,6 +59,7 @@ import MyDeals from "layouts/pages/my-deals/MyDeals";
 import MyDealDetails from "layouts/pages/my-deal-details/MyDealDetails";
 import Support from "layouts/pages/support/Support";
 import ProductsFinder from "layouts/pages/ProductsFinder/ProductsFinder";
+import SearchResults from "layouts/pages/ProductsFinder/SearchResult/SearchResult";
 
 // Images
 // import profilePicture from "assets/images/team-3.jpg";
@@ -118,6 +118,13 @@ const routes = [
     route: "/products-finder",
     component: <ProductsFinder />,
     noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Search Results",
+    key: "search-results",
+    route: "/search",
+    component: <SearchResults />,
   },
   {
     type: "collapse",

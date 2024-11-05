@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import ProductsFilter from "./ProductsFilter";
-import TableProducts from "./TableProducts";
+import CardProducts from "./CardProducts";
 
 function ProductsFinder() {
   // Estado para almacenar los filtros seleccionados
@@ -17,7 +17,7 @@ function ProductsFinder() {
     <DashboardLayout>
       <DashboardNavbar />
       <ProductsFilter onFiltersChange={handleFiltersChange} />
-      <TableProducts filters={filters} />
+      <CardProducts filters={filters} />
     </DashboardLayout>
   );
 }
