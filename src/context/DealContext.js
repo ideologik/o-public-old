@@ -11,6 +11,9 @@ function dealReducer(state, action) {
     case "SET_DEAL": {
       return { ...state, deal: action.value };
     }
+    case "SET_SELECTED_PRODUCT": {
+      return { ...state, selectedProduct: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -20,6 +23,7 @@ function dealReducer(state, action) {
 function DealProvider({ children }) {
   const initialState = {
     deal: null, // Estado inicial del `deal`
+    selectedProduct: null, // Estado inicial del `selectedProduct`
   };
 
   const [state, dispatch] = useReducer(dealReducer, initialState);
@@ -42,5 +46,7 @@ function useDeal() {
 
 // Función para establecer el `deal`
 const setDeal = (dispatch, deal) => dispatch({ type: "SET_DEAL", value: deal });
+const setSelectedProduct = (dispatch, selectedProduct) =>
+  dispatch({ type: "SET_SELECTED_PRODUCT", value: selectedProduct });
 
-export { DealProvider, useDeal, setDeal };
+export { DealProvider, useDeal, setDeal, setSelectedProduct };

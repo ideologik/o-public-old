@@ -5,8 +5,12 @@ import MDButton from "components/MDButton";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { findByImage, findByText } from "services";
+import { useDeal, setSelectedProduct } from "context/DealContext";
 
 const SearchResults = () => {
+  const { state, dispatch } = useDeal();
+
+  console.log("state", state);
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const query = params.get("query");

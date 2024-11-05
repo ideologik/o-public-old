@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
-import { Card, CardContent, Typography, Grid, CircularProgress, Box } from "@mui/material";
+import { Card, CardContent, Typography, Grid, CircularProgress, Box, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate
 import Slider from "react-slick";
 import MDSnackbar from "components/MDSnackbar";
@@ -8,6 +8,13 @@ import { productsFinder } from "services";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import MDButton from "components/MDButton";
+import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
+import { useDeal, setSelectedProduct } from "context/DealCont0ext";
+const getTrendIcon = (current, average) => {
+  if (current > average) return <ArrowUpward style={{ color: "green" }} />;
+  if (current < average) return <ArrowDownward style={{ color: "red" }} />;
+  return <HorizontalRule style={{ color: "gray" }} />;
+};
 
 const CardProducts = ({ filters }) => {
   const [products, setProducts] = useState([]);
@@ -22,8 +29,13 @@ const CardProducts = ({ filters }) => {
   const observerRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
   const navigate = useNavigate(); // Inicializa useNavigate
+  const { state, dispatch } = useDeal();
 
   const fetchProductsData = async (currentPage, showLoading = false) => {
+    console.log("filters", filters);
+    if (Object.keys(filters).length === 0) return;
+    if (filters.AmazonCategory === "") return;
+
     if (showLoading) setLoading(true);
     try {
       const response = await productsFinder({
@@ -67,7 +79,8 @@ const CardProducts = ({ filters }) => {
     [loading]
   );
 
-  const handleSearchAliExpress = (type, title, imageUrl) => {
+  const handleSearchAliExpress = (type, title, imageUrl, product) => {
+    setSelectedProduct(dispatch, product);
     // Redirige a otra ruta con los parámetros adecuados
     if (type === "text") {
       navigate(`/search?query=${encodeURIComponent(title)}`); // Navega usando el texto
@@ -131,50 +144,54 @@ const CardProducts = ({ filters }) => {
                   />
                 ))}
               </Slider>
-              <CardContent>
-                <Typography variant="h6">{product.bes_title}</Typography>
+              <CardContent style={{ paddingTop: "3vh" }}>
+                <Tooltip title={product.bes_title}>
+                  <Typography variant="h6">
+                    {product.bes_title.length > 40
+                      ? `${product.bes_title.slice(0, 40)}...`
+                      : product.bes_title}
+                  </Typography>
+                </Tooltip>
                 <Typography variant="body2" color="textSecondary">
                   Brand: {product.bes_brand || "N/A"}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Price: ${product.bes_price ? product.bes_price.toFixed(2) : "N/A"}
+                  Current Price: ${product.bes_price ? product.bes_price.toFixed(2) : "N/A"}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Sales Rank: {product.bes_salesrank || "N/A"}
+                  Sales Rank: {product.bes_salesrank || "N/A"}{" "}
+                  {getTrendIcon(product.bes_salesrank, product.bes_salesrank90DaysAverage)}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  90-Day Avg Sales Rank: {product.bes_salesrank90DaysAverage || "N/A"}
+                  Price Trend:{" "}
+                  {getTrendIcon(product.bes_price, product.bes_priceBuyBox90DaysAverage)}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Rating: {product.bes_rating ? `${product.bes_rating}/5` : "N/A"}
+                  Competition Trend:{" "}
+                  {getTrendIcon(product.bes_newOfferCount, product.bes_newOfferCount90DaysAverage)}
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Review Count: {product.bes_reviewCount || "N/A"}
-                </Typography>
-
-                {/* Título y Botones de acción */}
-                <Box mt={2}>
-                  <Typography variant="subtitle1">Find in AliExpress:</Typography>
+                <Box
+                  mt={12}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  style={{ marginTop: "2vh" }}
+                >
                   <MDButton
                     variant="outlined"
                     color="primary"
-                    size="small"
+                    size="large"
+                    fullWidth
                     onClick={() =>
-                      handleSearchAliExpress("text", product.bes_title, images[currentIndex])
-                    }
-                    style={{ marginRight: 8 }}
-                  >
-                    By Text
-                  </MDButton>
-                  <MDButton
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() =>
-                      handleSearchAliExpress("image", product.bes_title, images[currentIndex])
+                      handleSearchAliExpress(
+                        "image",
+                        product.bes_title,
+                        images[currentIndex],
+                        product
+                      )
                     }
                   >
-                    By Image
+                    Select Product
                   </MDButton>
                 </Box>
               </CardContent>
