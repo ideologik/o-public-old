@@ -99,3 +99,13 @@ export const fetchStoreByStoreId = async (store_id) => {
     throw new Error("Error fetching store");
   }
 };
+
+export const productsFinder = async (filters) => {
+  try {
+    const response = await client.get("productfinder", { params: filters });
+    return response;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw new Error("Error fetching products");
+  }
+};

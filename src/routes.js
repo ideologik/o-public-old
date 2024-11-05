@@ -59,6 +59,7 @@ import Home from "layouts/pages/home/Home";
 import MyDeals from "layouts/pages/my-deals/MyDeals";
 import MyDealDetails from "layouts/pages/my-deal-details/MyDealDetails";
 import Support from "layouts/pages/support/Support";
+import ProductsFinder from "layouts/pages/ProductsFinder/ProductsFinder";
 
 // Images
 // import profilePicture from "assets/images/team-3.jpg";
@@ -107,6 +108,15 @@ const routes = [
     route: "/my-deal-details",
     name: "My Deal Details",
     component: <MyDealDetails />,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Products Finder",
+    key: "products-finder",
+    icon: <Icon>travel_explore</Icon>, // Ícono de MUI para Deals
+    route: "/products-finder",
+    component: <ProductsFinder />,
     noCollapse: true,
   },
   {

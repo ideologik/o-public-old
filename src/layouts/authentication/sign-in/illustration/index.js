@@ -44,8 +44,8 @@ function Illustration() {
   const [rememberMe, setRememberMe] = useState(false);
   const [errorSB, setErrorSB] = useState(false);
   const closeErrorSB = () => setErrorSB(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("kiamso@gmail.com");
+  const [password, setPassword] = useState("CatrielYPaquito");
   const [passVisible, setPassVisible] = useState(false);
   const navigate = useNavigate();
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
@@ -151,6 +151,7 @@ function Illustration() {
             fullWidth
             onChange={(e) => setEmail(e.target.value)}
             value={email}
+            // value={"kiamso@gmail.com"}
           />
         </MDBox>
         <MDBox mb={2}>
@@ -159,6 +160,7 @@ function Illustration() {
             type={passVisible ? "text" : "password"}
             label="Password"
             value={password}
+            //value={"CatrielYPaquito"}
             onChange={(e) => setPassword(e.target.value)}
             fullWidth
             InputProps={{

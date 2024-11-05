@@ -1,16 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  Grid,
-  CircularProgress,
-} from "@mui/material";
+import { Card, CardContent, Typography, Grid, CircularProgress, Box } from "@mui/material";
+import Slider from "react-slick";
 import MDSnackbar from "components/MDSnackbar";
 import { productsFinder } from "services";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import MDButton from "components/MDButton";
 
 const CardProducts = ({ filters }) => {
   const [products, setProducts] = useState([]);
@@ -23,6 +19,7 @@ const CardProducts = ({ filters }) => {
   });
   const [page, setPage] = useState(0);
   const observerRef = useRef(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState({});
 
   const fetchProductsData = async (currentPage, showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -37,7 +34,7 @@ const CardProducts = ({ filters }) => {
       console.error("Error fetching products:", error);
       setAlertProps({
         open: true,
-        message: "Error al cargar los productos",
+        message: "Error loading products",
         color: "error",
       });
     }
@@ -69,56 +66,122 @@ const CardProducts = ({ filters }) => {
     [loading]
   );
 
-  const getFirstImage = (imageURLs) => {
-    if (!imageURLs) return "/placeholder.jpg"; // Imagen de respaldo si no hay URLs
-    const urlsArray = imageURLs.split(","); // Separar las URLs por coma
-    return urlsArray[0].trim(); // Retornar la primera URL, asegurándonos de quitar espacios en blanco
+  const handleSearchAliExpress = (type, title, imageUrl) => {
+    // Implementa la lógica para buscar en AliExpress usando texto o imagen
+    if (type === "text") {
+      console.log("Search on AliExpress by text:", title);
+    } else if (type === "image") {
+      console.log("Search on AliExpress by image:", imageUrl);
+    }
   };
 
-  const handleSearchAliExpress = (title, imageUrl) => {
-    // Implementa la lógica para buscar en AliExpress usando title o imageUrl
-    console.log("Buscar en AliExpress con título:", title, " o imagen:", imageUrl);
+  const getImagesArray = (imageURLs) => {
+    if (!imageURLs) return ["/placeholder.jpg"]; // Imagen de respaldo si no hay URLs
+    return imageURLs.split(",").map((url) => url.trim()); // Separar y limpiar las URLs
+  };
+
+  const handleImageChange = (index, productId) => {
+    // Guardar el índice de la imagen actual para el producto específico
+    setCurrentImageIndex((prevState) => ({
+      ...prevState,
+      [productId]: index,
+    }));
   };
 
   return (
-    <Grid container spacing={2} p={2}>
-      {products.map((product, index) => (
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={4}
-          key={index}
-          ref={index === products.length - 1 ? lastProductRef : null}
-        >
-          <Card>
-            <CardMedia
-              component="img"
-              height="140"
-              image={getFirstImage(product.bes_imageURLs)}
-              alt={product.bes_title}
-            />
-            <CardContent>
-              <Typography variant="h6">{product.bes_title}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Marca: {product.bes_brand || "N/A"}
-              </Typography>
-              <Typography variant="body1" color="primary">
-                Precio: ${product.bes_price ? product.bes_price.toFixed(2) : "N/A"}
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() =>
-                  handleSearchAliExpress(product.bes_title, getFirstImage(product.bes_imageURLs))
-                }
-              >
-                Buscar en AliExpress
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
+    <Grid container spacing={3} p={2}>
+      {products.map((product, index) => {
+        const images = getImagesArray(product.bes_imageURLs);
+        const currentIndex = currentImageIndex[product.bes_id] || 0;
+        const isSingleImage = images.length === 1;
+
+        // Configurar opciones de react-slick
+        const sliderSettings = {
+          dots: !isSingleImage,
+          arrows: false,
+          infinite: !isSingleImage,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          afterChange: (current) => handleImageChange(current, product.bes_id),
+        };
+
+        return (
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            key={index}
+            ref={index === products.length - 1 ? lastProductRef : null}
+          >
+            <Card>
+              <Slider {...sliderSettings} style={{ cursor: "grab" }}>
+                {images.map((image, imgIndex) => (
+                  <img
+                    key={imgIndex}
+                    src={image}
+                    alt={`${product.bes_title} - ${imgIndex}`}
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      objectFit: "contain",
+                      cursor: "pointer",
+                    }}
+                  />
+                ))}
+              </Slider>
+              <CardContent>
+                <Typography variant="h6">{product.bes_title}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Brand: {product.bes_brand || "N/A"}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Price: ${product.bes_price ? product.bes_price.toFixed(2) : "N/A"}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Sales Rank: {product.bes_salesrank || "N/A"}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  90-Day Avg Sales Rank: {product.bes_salesrank90DaysAverage || "N/A"}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Rating: {product.bes_rating ? `${product.bes_rating}/5` : "N/A"}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Review Count: {product.bes_reviewCount || "N/A"}
+                </Typography>
+
+                {/* Título y Botones de acción */}
+                <Box mt={2}>
+                  <Typography variant="subtitle1">Find in AliExpress:</Typography>
+                  <MDButton
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() =>
+                      handleSearchAliExpress("text", product.bes_title, images[currentIndex])
+                    }
+                    style={{ marginRight: 8 }}
+                  >
+                    By Text
+                  </MDButton>
+                  <MDButton
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() =>
+                      handleSearchAliExpress("image", product.bes_title, images[currentIndex])
+                    }
+                  >
+                    By Image
+                  </MDButton>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        );
+      })}
       {loading && (
         <Grid item xs={12} container justifyContent="center" alignItems="center">
           <CircularProgress size={30} />
