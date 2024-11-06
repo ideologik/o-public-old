@@ -1,4 +1,4 @@
-import client from "services/ApiClient";
+import client, { setBaseURL } from "services/ApiClient";
 
 // Servicio para buscar por imagen usando POST con query string
 export const findByImage = async (imageUrl) => {
@@ -34,6 +34,19 @@ export const findByText = async (searchText) => {
       throw new Error("Error fetching products");
     }
     return response.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw new Error("Error fetching products");
+  }
+};
+
+export const CreateAuth = async () => {
+  try {
+    setBaseURL(process.env.REACT_APP_API_BASE_URL.replace("io/", ""));
+    const url = `aliexpress/Create`;
+    const response = await client.post(url);
+
+    return response;
   } catch (error) {
     console.error("Error fetching products:", error);
     throw new Error("Error fetching products");

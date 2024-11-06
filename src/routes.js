@@ -60,6 +60,7 @@ import MyDealDetails from "layouts/pages/my-deal-details/MyDealDetails";
 import Support from "layouts/pages/support/Support";
 import ProductsFinder from "layouts/pages/ProductsFinder/ProductsFinder";
 import SearchResults from "layouts/pages/ProductsFinder/SearchResult/SearchResult";
+import AliexpressConfig from "layouts/pages/settings/AliexpressConfig";
 
 // Images
 // import profilePicture from "assets/images/team-3.jpg";
@@ -125,6 +126,15 @@ const routes = [
     key: "search-results",
     route: "/search",
     component: <SearchResults />,
+  },
+  {
+    type: "collapse",
+    name: "Aliexpress Config",
+    key: "aliexpressconfig",
+    icon: <Icon>settings</Icon>, // Ícono de MUI para soporte
+    route: "/aliexpressconfig",
+    component: <AliexpressConfig />,
+    noCollapse: true,
   },
   {
     type: "collapse",
