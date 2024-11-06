@@ -178,10 +178,9 @@ const CardProducts = ({ filters }) => {
                   style={{ marginTop: "2vh" }}
                 >
                   <MDButton
-                    variant="outlined"
-                    color="primary"
-                    size="large"
+                    variant="contained"
                     fullWidth
+                    color="primary"
                     onClick={() =>
                       handleSearchAliExpress(
                         "image",
