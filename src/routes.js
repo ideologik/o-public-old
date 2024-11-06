@@ -61,6 +61,7 @@ import Support from "layouts/pages/support/Support";
 import ProductsFinder from "layouts/pages/ProductsFinder/ProductsFinder";
 import SearchResults from "layouts/pages/ProductsFinder/SearchResult/SearchResult";
 import AliexpressConfig from "layouts/pages/settings/AliexpressConfig";
+import AliexpressDetail from "layouts/pages/ProductsFinder/SearchResult/AliexpressDetail";
 
 // Images
 // import profilePicture from "assets/images/team-3.jpg";
@@ -124,8 +125,15 @@ const routes = [
     type: "route",
     name: "Search Results",
     key: "search-results",
-    route: "/search",
+    route: "/product-finder/search",
     component: <SearchResults />,
+  },
+  {
+    type: "route",
+    name: "Search Results",
+    key: "search-results",
+    route: "/product-finder/aliexpress-details",
+    component: <AliexpressDetail />,
   },
   {
     type: "collapse",

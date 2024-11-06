@@ -42,6 +42,7 @@
     "flatpickr": "4.6.13",
     "formik": "2.2.9",
     "html-react-parser": "3.0.16",
+    "jotai": "^2.10.1",
     "moment": "^2.30.1",
     "mui-datatables": "3.8.5",
     "prop-types": "15.8.1",

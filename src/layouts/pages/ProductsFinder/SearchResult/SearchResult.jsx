@@ -3,19 +3,19 @@ import { useLocation } from "react-router-dom";
 import { Grid, Card, CardContent, Typography, CircularProgress, Box, Paper } from "@mui/material";
 import MDButton from "components/MDButton";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { findByImage, findByText } from "services";
-import { useDeal } from "context/DealContext";
+import { useAtom } from "jotai";
+import { bsSelectedProductAtom, aliexpressSelectedProductAtom } from "stores/productAtom";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
 const getTrendIcon = (current, average) => {
   if (current > average) return <ArrowUpward style={{ color: "green" }} />;
   if (current < average) return <ArrowDownward style={{ color: "red" }} />;
   return <HorizontalRule style={{ color: "gray" }} />;
 };
+import { useNavigate } from "react-router-dom";
 
 const SearchResults = () => {
-  const { state } = useDeal();
-  const selectedProduct = state.selectedProduct;
+  const [selectedProduct] = useAtom(bsSelectedProductAtom);
   console.log("product", selectedProduct);
   const { search } = useLocation();
   const params = new URLSearchParams(search);
@@ -25,6 +25,9 @@ const SearchResults = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
+
+  const [_, setAliexpressSelectedProduct] = useAtom(aliexpressSelectedProductAtom);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -53,6 +56,10 @@ const SearchResults = () => {
 
     fetchProducts();
   }, [query, imageUrl]);
+  const handleShowProductDetails = (product) => {
+    setAliexpressSelectedProduct(product);
+    navigate("/product-finder/aliexpress-details");
+  };
 
   return (
     <DashboardLayout>
@@ -117,7 +124,7 @@ const SearchResults = () => {
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
                         Bought in past month: &nbsp;
-                        {selectedProduct.bes_boughtInPastMonth || "N/A"}
+                        {selectedProduct.bes_boughtInPastMonth + "+" || "N/A"}
                       </Typography>
                     </CardContent>
                   </Grid>
@@ -178,11 +185,13 @@ const SearchResults = () => {
                             variant="contained"
                             fullWidth
                             color="primary"
-                            href={product.product_detail_url}
+                            onClick={() => {
+                              handleShowProductDetails(product);
+                            }}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            View Product
+                            Select
                           </MDButton>
                         </Box>
                       </CardContent>

@@ -1,6 +1,16 @@
 // src/api/dealService.js
 import client from "services/ApiClient";
 
+export const fecthDealCategories = async () => {
+  try {
+    const response = await client.get("deals/categories");
+    return response;
+  } catch (error) {
+    console.error("Error fetching deal categories:", error);
+    throw error;
+  }
+};
+
 export const fetchDeals = async (filters) => {
   console.log("filters", filters, Object.keys(filters));
   if (!filters || Object.keys(filters).length === 0) return { data: [] };

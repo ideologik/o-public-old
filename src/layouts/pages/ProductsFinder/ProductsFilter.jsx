@@ -11,22 +11,29 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  IconButton,
 } from "@mui/material";
-import { Search, FilterList, AttachMoney, Percent } from "@mui/icons-material";
-import client from "services/ApiClient";
+import { Search } from "@mui/icons-material";
+import { fecthDealCategories } from "services";
+
+import { useAtom } from "jotai";
+import { bsSelectedCategoryAtom } from "stores/productAtom";
 
 const ProductsFilter = ({ onFiltersChange }) => {
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("any");
+  const [selectedCategory, setSelectedCategory] = useAtom(bsSelectedCategoryAtom);
 
   useEffect(() => {
     const fetchDealsGoups = async () => {
-      const productGroups = await client.get("deals/categories");
+      const productGroups = await fecthDealCategories();
       setCategories(productGroups.sort());
     };
     fetchDealsGoups();
+    handleFilterChange();
   }, []);
+
+  useEffect(() => {
+    handleFilterChange();
+  }, [selectedCategory]);
 
   // Función para actualizar los filtros y pasarlos al componente padre
   const handleFilterChange = () => {
@@ -51,29 +58,29 @@ const ProductsFilter = ({ onFiltersChange }) => {
           <Grid container spacing={2} alignItems="center">
             {/* Category Filter */}
             <Grid item md={12}>
-              <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
-                <InputLabel>By category</InputLabel>
-                <Select
-                  label="By category"
-                  value={selectedCategory}
-                  onChange={(e) => {
-                    setSelectedCategory(e.target.value);
-                  }}
-                  autoWidth
-                  sx={{ height: "56px" }}
-                >
-                  <MenuItem value="any">Select Product Type</MenuItem>
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              {categories.length > 0 && (
+                <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
+                  <InputLabel>By category</InputLabel>
+                  <Select
+                    label="By category"
+                    value={selectedCategory || "any"}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    autoWidth
+                    sx={{ height: "56px" }}
+                  >
+                    <MenuItem value="any">Select Product Type</MenuItem>
+                    {categories.map((category) => (
+                      <MenuItem key={category} value={category}>
+                        {category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
             </Grid>
 
             {/* Search Button */}
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Box textAlign="center">
                 <IconButton
                   color="primary"
@@ -89,7 +96,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <Search />
                 </IconButton>
               </Box>
-            </Grid>
+            </Grid> */}
           </Grid>
         </CardContent>
       </Card>

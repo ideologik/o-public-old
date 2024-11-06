@@ -9,7 +9,9 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import MDButton from "components/MDButton";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
-import { useDeal, setSelectedProduct } from "context/DealContext";
+import { useAtom } from "jotai";
+import { bsSelectedProductAtom } from "stores/productAtom";
+
 const getTrendIcon = (current, average) => {
   if (current > average) return <ArrowUpward style={{ color: "green" }} />;
   if (current < average) return <ArrowDownward style={{ color: "red" }} />;
@@ -28,13 +30,15 @@ const CardProducts = ({ filters }) => {
   const [page, setPage] = useState(0);
   const observerRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const navigate = useNavigate(); // Inicializa useNavigate
-  const { state, dispatch } = useDeal();
+  const navigate = useNavigate();
+  const [_, setBsSelectedProduct] = useAtom(bsSelectedProductAtom);
 
   const fetchProductsData = async (currentPage, showLoading = false) => {
     console.log("filters", filters);
-    if (Object.keys(filters).length === 0) return;
-    if (filters.AmazonCategory === "") return;
+    if (Object.keys(filters).length === 0 || filters.AmazonCategory === null) {
+      setProducts([]);
+      return;
+    }
 
     if (showLoading) setLoading(true);
     try {
@@ -80,12 +84,12 @@ const CardProducts = ({ filters }) => {
   );
 
   const handleSearchAliExpress = (type, title, imageUrl, product) => {
-    setSelectedProduct(dispatch, product);
+    setBsSelectedProduct(product);
     // Redirige a otra ruta con los parámetros adecuados
     if (type === "text") {
-      navigate(`/search?query=${encodeURIComponent(title)}`); // Navega usando el texto
+      navigate(`/product-finder/search?query=${encodeURIComponent(title)}`); // Navega usando el texto
     } else if (type === "image") {
-      navigate(`/search?imageUrl=${encodeURIComponent(imageUrl)}`); // Navega usando la URL de la imagen
+      navigate(`/product-finder/search?imageUrl=${encodeURIComponent(imageUrl)}`); // Navega usando la URL de la imagen
     }
   };
 
