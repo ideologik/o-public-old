@@ -1,12 +1,27 @@
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import MDButton from "components/MDButton";
-import { Grid, Card, CardContent, Typography, Box, Paper } from "@mui/material";
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Paper,
+  List,
+  ListItemButton,
+  ListItemText,
+  CircularProgress,
+} from "@mui/material";
 
 import { useAtom } from "jotai";
+import { useState } from "react";
 import { bsSelectedProductAtom, aliexpressSelectedProductAtom } from "stores/productAtom";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
 
+import { AliExpressProductEnhancer } from "services";
+
+// Función para el ícono de tendencia
 const getTrendIcon = (current, average) => {
   if (current > average) return <ArrowUpward style={{ color: "green" }} />;
   if (current < average) return <ArrowDownward style={{ color: "red" }} />;
@@ -16,6 +31,26 @@ const getTrendIcon = (current, average) => {
 const AliexpressDetail = () => {
   const [aliexpressSelectedProduct] = useAtom(aliexpressSelectedProductAtom);
   const [selectedProduct] = useAtom(bsSelectedProductAtom);
+
+  console.log("aliexpressSelectedProduct", aliexpressSelectedProduct.product_id);
+  console.log("selectedProduct", selectedProduct);
+
+  // Estado para almacenar los datos de la API
+  const [additionalInfo, setAdditionalInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Función para obtener datos adicionales de la API
+  const fetchAdditionalInfo = async () => {
+    setLoading(true);
+    try {
+      const data = await AliExpressProductEnhancer(aliexpressSelectedProduct.product_id);
+      console.log(data);
+      setAdditionalInfo(data);
+    } catch (error) {
+      console.error("Error al obtener la información adicional:", error);
+    }
+    setLoading(false);
+  };
 
   return (
     <DashboardLayout>
@@ -116,6 +151,7 @@ const AliexpressDetail = () => {
                     variant="contained"
                     fullWidth
                     color="primary"
+                    onClick={fetchAdditionalInfo}
                     sx={{
                       paddingY: 1.5,
                       fontSize: "1rem",
@@ -149,6 +185,53 @@ const AliexpressDetail = () => {
                   <Typography variant="h6" gutterBottom>
                     Additional Product Information
                   </Typography>
+                  {loading ? (
+                    <CircularProgress />
+                  ) : additionalInfo ? (
+                    <>
+                      <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
+                        Select an Image:
+                      </Typography>
+                      <List>
+                        {additionalInfo.imageURLs.map((url, index) => (
+                          <ListItemButton key={index}>
+                            <img
+                              src={url}
+                              alt={`Product ${index}`}
+                              style={{ width: "50px", marginRight: "10px" }}
+                            />
+                            <ListItemText primary={`Image ${index + 1}`} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+
+                      <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
+                        Select a Title:
+                      </Typography>
+                      <List>
+                        {additionalInfo.productTitles.map((title, index) => (
+                          <ListItemButton key={index}>
+                            <ListItemText primary={title} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+
+                      <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
+                        Select a Description:
+                      </Typography>
+                      <List>
+                        {additionalInfo.productDescriptions.map((desc, index) => (
+                          <ListItemButton key={index}>
+                            <ListItemText primary={desc} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </>
+                  ) : (
+                    <Typography variant="body2" color="textSecondary">
+                      No additional information available. Press Enhance Product to load.
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Paper>
