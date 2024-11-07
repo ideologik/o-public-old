@@ -13,7 +13,7 @@ import {
   ListItemText,
   CircularProgress,
   Checkbox,
-  IconButton,
+  TextField,
 } from "@mui/material";
 
 import { useAtom } from "jotai";
@@ -34,12 +34,15 @@ const AliexpressDetail = () => {
   const [selectedProduct] = useAtom(bsSelectedProductAtom);
   console.log("aliexpressSelectedProduct", aliexpressSelectedProduct.product_id);
   console.log("selectedProduct", selectedProduct);
+
   // Estado para almacenar los datos de la API y selecciones
   const [additionalInfo, setAdditionalInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]); // selección múltiple de imágenes
   const [selectedTitle, setSelectedTitle] = useState(null); // selección única de título
   const [selectedDescription, setSelectedDescription] = useState(null); // selección única de descripción
+  const [editingTitleIndex, setEditingTitleIndex] = useState(null); // índice del título en edición
+  const [editingDescriptionIndex, setEditingDescriptionIndex] = useState(null); // índice de descripción en edición
 
   // Función para obtener datos adicionales de la API
   const fetchAdditionalInfo = async () => {
@@ -69,6 +72,40 @@ const AliexpressDetail = () => {
   // Manejar selección única de descripción
   const handleDescriptionSelect = (index) => {
     setSelectedDescription(index);
+  };
+
+  // Activar modo de edición para títulos y descripciones
+  const handleTitleDoubleClick = (index) => {
+    setEditingTitleIndex(index);
+  };
+
+  const handleDescriptionDoubleClick = (index) => {
+    setEditingDescriptionIndex(index);
+  };
+
+  // Funciones para actualizar el contenido mientras se edita
+  const handleTitleChange = (event, index) => {
+    const newTitles = [...additionalInfo.productTitles];
+    newTitles[index] = event.target.value;
+    setAdditionalInfo((prev) => ({
+      ...prev,
+      productTitles: newTitles,
+    }));
+  };
+
+  const handleDescriptionChange = (event, index) => {
+    const newDescriptions = [...additionalInfo.productDescriptions];
+    newDescriptions[index] = event.target.value;
+    setAdditionalInfo((prev) => ({
+      ...prev,
+      productDescriptions: newDescriptions,
+    }));
+  };
+
+  // Función para finalizar la edición
+  const handleEditComplete = () => {
+    setEditingTitleIndex(null);
+    setEditingDescriptionIndex(null);
   };
 
   return (
@@ -220,11 +257,11 @@ const AliexpressDetail = () => {
                                   ? "2px solid blue"
                                   : "1px solid gray",
                                 cursor: "pointer",
-                                overflow: "hidden", // Para evitar que el contenido se salga al agrandar
-                                aspectRatio: "1 / 1", // Hace que la tarjeta sea cuadrada
-                                transition: "transform 0.2s ease-in-out", // Animación para el hover
+                                overflow: "hidden",
+                                aspectRatio: "1 / 1",
+                                transition: "transform 0.2s ease-in-out",
                                 "&:hover": {
-                                  transform: "scale(1.05)", // Efecto de agrandamiento
+                                  transform: "scale(1.05)",
                                 },
                               }}
                               onClick={() => handleImageToggle(index)}
@@ -236,7 +273,7 @@ const AliexpressDetail = () => {
                                 sx={{
                                   width: "100%",
                                   height: "100%",
-                                  objectFit: "contain", // Ajuste completo sin recortar
+                                  objectFit: "contain",
                                 }}
                               />
                               <Checkbox
@@ -248,6 +285,7 @@ const AliexpressDetail = () => {
                         ))}
                       </Grid>
 
+                      {/* Lista de Títulos */}
                       <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
                         Select a Title:
                       </Typography>
@@ -257,12 +295,25 @@ const AliexpressDetail = () => {
                             key={index}
                             selected={selectedTitle === index}
                             onClick={() => handleTitleSelect(index)}
+                            onDoubleClick={() => handleTitleDoubleClick(index)}
                           >
-                            <ListItemText primary={title} />
+                            {editingTitleIndex === index ? (
+                              <TextField
+                                value={title}
+                                onChange={(e) => handleTitleChange(e, index)}
+                                onBlur={handleEditComplete}
+                                autoFocus
+                                fullWidth
+                                size="small"
+                              />
+                            ) : (
+                              <ListItemText primary={title} />
+                            )}
                           </ListItemButton>
                         ))}
                       </List>
 
+                      {/* Lista de Descripciones */}
                       <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
                         Select a Description:
                       </Typography>
@@ -272,8 +323,20 @@ const AliexpressDetail = () => {
                             key={index}
                             selected={selectedDescription === index}
                             onClick={() => handleDescriptionSelect(index)}
+                            onDoubleClick={() => handleDescriptionDoubleClick(index)}
                           >
-                            <ListItemText primary={desc} />
+                            {editingDescriptionIndex === index ? (
+                              <TextField
+                                value={desc}
+                                onChange={(e) => handleDescriptionChange(e, index)}
+                                onBlur={handleEditComplete}
+                                autoFocus
+                                fullWidth
+                                size="small"
+                              />
+                            ) : (
+                              <ListItemText primary={desc} />
+                            )}
                           </ListItemButton>
                         ))}
                       </List>
