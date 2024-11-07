@@ -124,18 +124,31 @@ const AliexpressDetail = () => {
               }}
             >
               <Card sx={{ borderRadius: 2, overflow: "hidden" }}>
+                {/* Contenedor de imagen cuadrado con sombra */}
                 <Box
-                  component="img"
-                  src={aliexpressSelectedProduct.product_main_image_url || "/placeholder.jpg"}
-                  alt={aliexpressSelectedProduct.product_title}
                   sx={{
                     width: "100%",
-                    height: 200,
-                    objectFit: "cover",
-                    borderTopLeftRadius: "inherit",
-                    borderTopRightRadius: "inherit",
+                    aspectRatio: "1 / 1", // Hace que el contenedor sea cuadrado
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)", // Sombra de la "tarjeta" de imagen
+                    borderRadius: 2,
+                    mb: 2, // Margen inferior
                   }}
-                />
+                >
+                  <Box
+                    component="img"
+                    src={aliexpressSelectedProduct.product_main_image_url || "/placeholder.jpg"}
+                    alt={aliexpressSelectedProduct.product_title}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain", // Asegura que la imagen se vea completa sin recortes
+                    }}
+                  />
+                </Box>
                 <CardContent sx={{ padding: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     {aliexpressSelectedProduct.product_title}
@@ -210,6 +223,7 @@ const AliexpressDetail = () => {
                     onClick={fetchAdditionalInfo}
                     sx={{
                       paddingY: 1.5,
+                      marginTop: 2,
                       fontSize: "1rem",
                       fontWeight: "bold",
                       backgroundColor: "#3A75C4",
@@ -340,6 +354,23 @@ const AliexpressDetail = () => {
                           </ListItemButton>
                         ))}
                       </List>
+                      <MDButton
+                        variant="contained"
+                        fullWidth
+                        color="primary"
+                        sx={{
+                          paddingY: 1.5,
+                          marginTop: 2,
+                          fontSize: "1rem",
+                          fontWeight: "bold",
+                          backgroundColor: "#3A75C4",
+                          "&:hover": {
+                            backgroundColor: "#315d9d",
+                          },
+                        }}
+                      >
+                        Publish Product
+                      </MDButton>
                     </>
                   ) : (
                     <Typography variant="body2" color="textSecondary">
