@@ -12,13 +12,14 @@ import {
   ListItemButton,
   ListItemText,
   CircularProgress,
+  Checkbox,
+  IconButton,
 } from "@mui/material";
 
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { bsSelectedProductAtom, aliexpressSelectedProductAtom } from "stores/productAtom";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
-
 import { AliExpressProductEnhancer } from "services";
 
 // Función para el ícono de tendencia
@@ -31,13 +32,14 @@ const getTrendIcon = (current, average) => {
 const AliexpressDetail = () => {
   const [aliexpressSelectedProduct] = useAtom(aliexpressSelectedProductAtom);
   const [selectedProduct] = useAtom(bsSelectedProductAtom);
-
   console.log("aliexpressSelectedProduct", aliexpressSelectedProduct.product_id);
   console.log("selectedProduct", selectedProduct);
-
-  // Estado para almacenar los datos de la API
+  // Estado para almacenar los datos de la API y selecciones
   const [additionalInfo, setAdditionalInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]); // selección múltiple de imágenes
+  const [selectedTitle, setSelectedTitle] = useState(null); // selección única de título
+  const [selectedDescription, setSelectedDescription] = useState(null); // selección única de descripción
 
   // Función para obtener datos adicionales de la API
   const fetchAdditionalInfo = async () => {
@@ -50,6 +52,23 @@ const AliexpressDetail = () => {
       console.error("Error al obtener la información adicional:", error);
     }
     setLoading(false);
+  };
+
+  // Manejar selección de imagen
+  const handleImageToggle = (index) => {
+    setSelectedImages((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  // Manejar selección única de título
+  const handleTitleSelect = (index) => {
+    setSelectedTitle(index);
+  };
+
+  // Manejar selección única de descripción
+  const handleDescriptionSelect = (index) => {
+    setSelectedDescription(index);
   };
 
   return (
@@ -190,27 +209,55 @@ const AliexpressDetail = () => {
                   ) : additionalInfo ? (
                     <>
                       <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
-                        Select an Image:
+                        Select Images:
                       </Typography>
-                      <List>
+                      <Grid container spacing={1}>
                         {additionalInfo.imageURLs.map((url, index) => (
-                          <ListItemButton key={index}>
-                            <img
-                              src={url}
-                              alt={`Product ${index}`}
-                              style={{ width: "50px", marginRight: "10px" }}
-                            />
-                            <ListItemText primary={`Image ${index + 1}`} />
-                          </ListItemButton>
+                          <Grid item xs={2} key={index}>
+                            <Card
+                              sx={{
+                                border: selectedImages.includes(index)
+                                  ? "2px solid blue"
+                                  : "1px solid gray",
+                                cursor: "pointer",
+                                overflow: "hidden", // Para evitar que el contenido se salga al agrandar
+                                aspectRatio: "1 / 1", // Hace que la tarjeta sea cuadrada
+                                transition: "transform 0.2s ease-in-out", // Animación para el hover
+                                "&:hover": {
+                                  transform: "scale(1.05)", // Efecto de agrandamiento
+                                },
+                              }}
+                              onClick={() => handleImageToggle(index)}
+                            >
+                              <Box
+                                component="img"
+                                src={url}
+                                alt={`Product ${index}`}
+                                sx={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "contain", // Ajuste completo sin recortar
+                                }}
+                              />
+                              <Checkbox
+                                checked={selectedImages.includes(index)}
+                                sx={{ position: "absolute", top: 0, right: 0 }}
+                              />
+                            </Card>
+                          </Grid>
                         ))}
-                      </List>
+                      </Grid>
 
                       <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
                         Select a Title:
                       </Typography>
                       <List>
                         {additionalInfo.productTitles.map((title, index) => (
-                          <ListItemButton key={index}>
+                          <ListItemButton
+                            key={index}
+                            selected={selectedTitle === index}
+                            onClick={() => handleTitleSelect(index)}
+                          >
                             <ListItemText primary={title} />
                           </ListItemButton>
                         ))}
@@ -221,7 +268,11 @@ const AliexpressDetail = () => {
                       </Typography>
                       <List>
                         {additionalInfo.productDescriptions.map((desc, index) => (
-                          <ListItemButton key={index}>
+                          <ListItemButton
+                            key={index}
+                            selected={selectedDescription === index}
+                            onClick={() => handleDescriptionSelect(index)}
+                          >
                             <ListItemText primary={desc} />
                           </ListItemButton>
                         ))}
