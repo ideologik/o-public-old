@@ -32,8 +32,6 @@ const getTrendIcon = (current, average) => {
 const AliexpressDetail = () => {
   const [aliexpressSelectedProduct] = useAtom(aliexpressSelectedProductAtom);
   const [selectedProduct] = useAtom(bsSelectedProductAtom);
-  console.log("aliexpressSelectedProduct", aliexpressSelectedProduct.product_id);
-  console.log("selectedProduct", selectedProduct);
 
   // Estado para almacenar los datos de la API y selecciones
   const [additionalInfo, setAdditionalInfo] = useState(null);
@@ -49,7 +47,6 @@ const AliexpressDetail = () => {
     setLoading(true);
     try {
       const data = await AliExpressProductEnhancer(aliexpressSelectedProduct.product_id);
-      console.log(data);
       setAdditionalInfo(data);
     } catch (error) {
       console.error("Error al obtener la información adicional:", error);
@@ -107,6 +104,25 @@ const AliexpressDetail = () => {
     setEditingTitleIndex(null);
     setEditingDescriptionIndex(null);
   };
+
+  // Función para mostrar el alert al hacer clic en "Publish Product"
+  const handlePublishProduct = () => {
+    if (selectedImages.length > 0 && selectedTitle !== null && selectedDescription !== null) {
+      const selectedTitleText = additionalInfo.productTitles[selectedTitle];
+      const selectedDescriptionText = additionalInfo.productDescriptions[selectedDescription];
+      const selectedImagesUrls = selectedImages.map((index) => additionalInfo.imageURLs[index]);
+
+      alert(
+        `Selected Images: ${selectedImagesUrls.join(
+          ", "
+        )}\nSelected Title: ${selectedTitleText}\nSelected Description: ${selectedDescriptionText}`
+      );
+    }
+  };
+
+  // Deshabilitar el botón si no hay al menos una imagen, un título y una descripción seleccionada
+  const isPublishDisabled =
+    selectedImages.length === 0 || selectedTitle === null || selectedDescription === null;
 
   return (
     <DashboardLayout>
@@ -354,18 +370,21 @@ const AliexpressDetail = () => {
                           </ListItemButton>
                         ))}
                       </List>
+
                       <MDButton
                         variant="contained"
                         fullWidth
                         color="primary"
+                        onClick={handlePublishProduct}
+                        disabled={isPublishDisabled} // Botón deshabilitado si faltan selecciones
                         sx={{
                           paddingY: 1.5,
                           marginTop: 2,
                           fontSize: "1rem",
                           fontWeight: "bold",
-                          backgroundColor: "#3A75C4",
+                          backgroundColor: isPublishDisabled ? "#c0c0c0" : "#3A75C4",
                           "&:hover": {
-                            backgroundColor: "#315d9d",
+                            backgroundColor: isPublishDisabled ? "#c0c0c0" : "#315d9d",
                           },
                         }}
                       >
