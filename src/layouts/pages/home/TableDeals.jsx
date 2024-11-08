@@ -16,6 +16,7 @@ import MDSnackbar from "components/MDSnackbar";
 import { fetchDeals, fetchCredit, checkDeal, unlockDeal } from "services";
 import DealDetails from "./DealDetails";
 import MUIDataTable from "mui-datatables";
+import { sort } from "draft-js/lib/DefaultDraftBlockRenderMap";
 
 const TableDeals = ({ filters }) => {
   const [deals, setDeals] = useState([]);
@@ -33,6 +34,7 @@ const TableDeals = ({ filters }) => {
   const [count, setCount] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState({ sort_by: "deal_id", asc: false });
   const fetchDealsData = async (currentPage, currentRowsPerPage, showLoading = false) => {
     if (showLoading) {
       setLoading(true);
@@ -40,6 +42,7 @@ const TableDeals = ({ filters }) => {
     try {
       const response = await fetchDeals({
         ...filters,
+        ...sort,
         page: currentPage,
         total_rows: currentRowsPerPage,
       });
@@ -55,18 +58,19 @@ const TableDeals = ({ filters }) => {
 
   // Este efecto se ejecuta cuando cambian los filtros
   useEffect(() => {
+    console.log("entro cambio de filtros", filters);
     const fetchData = async () => {
       await fetchDealsData(0, rowsPerPage, true); // Mostrar loading al cambiar filtros
     };
 
     fetchData();
     setPage(0); // Reinicia la página cuando cambian los filtros
-  }, [filters]);
+  }, [filters, sort]);
 
   // Este efecto se ejecuta cuando cambian la página o las filas por página
   useEffect(() => {
     fetchDealsData(page, rowsPerPage); // No mostrar loading al cambiar de página
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, filters]);
 
   const handleTableChange = (action, tableState) => {
     if (action === "changePage") {
@@ -208,7 +212,9 @@ const TableDeals = ({ filters }) => {
     {
       name: "deal_productGroup",
       label: "Category",
-      options: { filter: true, sort: true },
+      options: {
+        sort: false,
+      },
     },
     {
       name: "deal_date",
@@ -236,6 +242,7 @@ const TableDeals = ({ filters }) => {
       label: "FBA fees",
       options: {
         customBodyRender: (value) => (value !== undefined ? `$${value.toFixed(2)}` : "N/A"),
+        sort: false,
       },
     },
     {
@@ -302,6 +309,10 @@ const TableDeals = ({ filters }) => {
     download: false,
     search: false,
     viewColumns: false,
+    onColumnSortChange: (changedColumn, direction) => {
+      console.log(changedColumn, direction);
+      setSort({ sort_by: changedColumn, asc: direction === "asc" });
+    },
   };
 
   return (
