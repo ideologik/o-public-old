@@ -40,12 +40,14 @@ const TableDeals = ({ filters }) => {
       setLoading(true);
     }
     try {
-      const response = await fetchDeals({
+      const params = {
         ...filters,
         ...sort,
         page: currentPage,
         total_rows: currentRowsPerPage,
-      });
+      };
+      console.log("filters xxxxx", params);
+      const response = await fetchDeals(params);
       setDeals(response.data);
       setCount(response.total_records);
     } catch (error) {
@@ -56,21 +58,20 @@ const TableDeals = ({ filters }) => {
     }
   };
 
-  // Este efecto se ejecuta cuando cambian los filtros
+  // Actualización de los datos cuando cambian los filtros, orden o página
   useEffect(() => {
-    console.log("entro cambio de filtros", filters);
     const fetchData = async () => {
-      await fetchDealsData(0, rowsPerPage, true); // Mostrar loading al cambiar filtros
+      await fetchDealsData(0, rowsPerPage, true); // Mostrar loading al cambiar filtros o el orden
     };
 
     fetchData();
-    setPage(0); // Reinicia la página cuando cambian los filtros
+    setPage(0); // Reinicia la página cuando cambian los filtros o el orden
   }, [filters, sort]);
 
   // Este efecto se ejecuta cuando cambian la página o las filas por página
   useEffect(() => {
     fetchDealsData(page, rowsPerPage); // No mostrar loading al cambiar de página
-  }, [page, rowsPerPage, filters]);
+  }, [page, rowsPerPage, sort]);
 
   const handleTableChange = (action, tableState) => {
     if (action === "changePage") {
@@ -309,8 +310,13 @@ const TableDeals = ({ filters }) => {
     download: false,
     search: false,
     viewColumns: false,
+    sortOrder: {
+      name: sort.sort_by,
+      direction: sort.asc ? "asc" : "desc",
+    },
     onColumnSortChange: (changedColumn, direction) => {
-      console.log(changedColumn, direction);
+      console.log(`Column sorted: ${changedColumn}`);
+      console.log(`Sort direction: ${direction}`);
       setSort({ sort_by: changedColumn, asc: direction === "asc" });
     },
   };
