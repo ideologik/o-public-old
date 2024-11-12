@@ -40,16 +40,34 @@ export const findByText = async (searchText) => {
   }
 };
 
-export const CreateAuth = async () => {
+export const createAuth = async () => {
   try {
+    const oldBaseURL = process.env.REACT_APP_API_BASE_URL;
+
     setBaseURL(process.env.REACT_APP_API_BASE_URL.replace("io/", ""));
     const url = `aliexpress/Create`;
     const response = await client.post(url);
+    setBaseURL(oldBaseURL);
 
     return response;
   } catch (error) {
     console.error("Error fetching products:", error);
     throw new Error("Error fetching products");
+  }
+};
+
+export const statusAuth = async () => {
+  try {
+    const oldBaseURL = process.env.REACT_APP_API_BASE_URL;
+    setBaseURL(process.env.REACT_APP_API_BASE_URL.replace("io/", ""));
+    const url = `aliexpress/status`;
+    const response = await client.get(url);
+    setBaseURL(oldBaseURL);
+
+    return response;
+  } catch (error) {
+    console.error("Error status auth:", error);
+    throw new Error("Error status auth");
   }
 };
 

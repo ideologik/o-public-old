@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import { CreateAuth } from "services/aliexpressService";
+import { createAuth, statusAuth } from "services/aliexpressService";
 import MDAlert from "components/MDAlert"; // Asegúrate de importar MDAlert correctamente
 
 function AliexpressConfig() {
@@ -16,18 +16,27 @@ function AliexpressConfig() {
 
   useEffect(() => {
     const handleCreateAuth = async () => {
-      if (ok === null) {
-        try {
-          const response = await CreateAuth();
+      try {
+        // Primero, verifica el estado de autenticación
+        const authStatus = await statusAuth();
+        const { status } = authStatus;
+
+        if (status === "Connected") {
+          // Mostrar mensaje si ya está conectado
+          setMessage("Already connected to AliExpress.");
+          setMessageType("success");
+        } else if (ok === null) {
+          // Si no está conectado y ok es null, intenta crear la autenticación
+          const response = await createAuth();
           if (response) {
-            // Redirect to the URL provided in the response
+            // Redirigir a la URL proporcionada en la respuesta
             window.location.href = response;
           }
-        } catch (err) {
-          console.error("Error creating AliExpress authentication:", err);
-          setMessage("Error connecting to AliExpress.");
-          setMessageType("error");
         }
+      } catch (err) {
+        console.error("Error verifying AliExpress authentication:", err);
+        setMessage("Error connecting to AliExpress.");
+        setMessageType("error");
       }
     };
 
