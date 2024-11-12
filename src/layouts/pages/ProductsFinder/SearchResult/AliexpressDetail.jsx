@@ -20,7 +20,7 @@ import { useAtom } from "jotai";
 import { useState } from "react";
 import { bsSelectedProductAtom, aliexpressSelectedProductAtom } from "stores/productAtom";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
-import { AliExpressProductEnhancer } from "services";
+import { aliExpressProductEnhancer, shopifyCreateProduct } from "services";
 
 // Función para el ícono de tendencia
 const getTrendIcon = (current, average) => {
@@ -46,7 +46,7 @@ const AliexpressDetail = () => {
   const fetchAdditionalInfo = async () => {
     setLoading(true);
     try {
-      const data = await AliExpressProductEnhancer(aliexpressSelectedProduct.product_id);
+      const data = await aliExpressProductEnhancer(aliexpressSelectedProduct.product_id);
       setAdditionalInfo(data);
     } catch (error) {
       console.error("Error al obtener la información adicional:", error);
@@ -106,12 +106,18 @@ const AliexpressDetail = () => {
   };
 
   // Función para mostrar el alert al hacer clic en "Publish Product"
-  const handlePublishProduct = () => {
+  const handlePublishProduct = async () => {
     if (selectedImages.length > 0 && selectedTitle !== null && selectedDescription !== null) {
       const selectedTitleText = additionalInfo.productTitles[selectedTitle];
       const selectedDescriptionText = additionalInfo.productDescriptions[selectedDescription];
       const selectedImagesUrls = selectedImages.map((index) => additionalInfo.imageURLs[index]);
-
+      const response = await shopifyCreateProduct({
+        title: selectedTitleText,
+        descriptionHTML: selectedDescriptionText,
+        price: selectedProduct.bes_price,
+        imageURLs: selectedImagesUrls.join(","),
+      });
+      console.log("Product created:", response);
       alert(
         `Selected Images: ${selectedImagesUrls.join(
           ", "
