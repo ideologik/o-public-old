@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {
-  Box,
   Card,
   CardHeader,
   CardContent,
@@ -17,8 +16,11 @@ import {
   FormControlLabel,
   IconButton,
 } from "@mui/material";
+import MDBox from "components/MDBox";
+
 import { Search, FilterList, AttachMoney, Percent } from "@mui/icons-material";
 import client from "services/ApiClient";
+import { useFeatureFlags } from "context/FeatureFlags";
 
 // Función para obtener y actualizar los datos de la API cada hora
 const fetchAndStoreDeals = async () => {
@@ -60,6 +62,7 @@ const calculateDateFrom = (daysAgo) => {
 };
 
 const SearchFilter = ({ onFiltersChange }) => {
+  const { features } = useFeatureFlags();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("any");
   const [filterDate, setFilterDate] = useState("-7");
@@ -92,7 +95,7 @@ const SearchFilter = ({ onFiltersChange }) => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
+    <MDBox sx={{ padding: 2 }}>
       <Card>
         <CardHeader
           title={
@@ -100,7 +103,7 @@ const SearchFilter = ({ onFiltersChange }) => {
               Search Filter
             </Typography>
           }
-          sx={{ backgroundColor: "#735AC7" }}
+          sx={{ backgroundColor: features.colorPrimary }}
         />
         <CardContent style={{ paddingTop: "1.5%" }}>
           <Grid container spacing={2} alignItems="center">
@@ -244,12 +247,12 @@ const SearchFilter = ({ onFiltersChange }) => {
 
             {/* Search Button */}
             <Grid item xs={12}>
-              <Box textAlign="center">
+              <MDBox textAlign="center">
                 <IconButton
                   color="primary"
                   size="large"
                   sx={{
-                    backgroundColor: "#735AC7",
+                    backgroundColor: features.colorPrimary,
                     color: "#AAAAAA",
                     padding: 2,
                     borderRadius: "50%",
@@ -258,12 +261,12 @@ const SearchFilter = ({ onFiltersChange }) => {
                 >
                   <Search />
                 </IconButton>
-              </Box>
+              </MDBox>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
-    </Box>
+    </MDBox>
   );
 };
 

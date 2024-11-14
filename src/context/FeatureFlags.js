@@ -1,7 +1,6 @@
 import client from "services/ApiClient";
 import rgba from "assets/theme/functions/rgba";
-import React from "react";
-
+import React, { useEffect } from "react";
 export const FeatureFlags = React.createContext({});
 
 /*eslint-disable*/
@@ -10,11 +9,11 @@ export function FeatureFlagsProvider({ children }) {
     isGooglePayEnabled: false,
     plName: "sendpad", //sendpad
     hiddenMenus: ["catalogs", "series", "blogs", "automation", "sales"],
-    colorBackground: "#F4F0F7",
-    colorPrimary: "#735AC7",
-    colorPrimaryFocus: "#735AC7",
-    colorPrimaryGradient: "#735AC7",
-    colorPrimaryGradientState: "#998FC7",
+    colorBackground: "#E1EBF7", // color de fondo
+    colorPrimary: "#1B59D6", // color azul oscuro del botón "REGISTER NOW"
+    colorPrimaryFocus: "#153A91", // azul oscuro en el texto de "ACTION STEP #1"
+    colorPrimaryGradient: "#2851A3", // azul gradiente en la sección del encabezado
+    colorPrimaryGradientState: "#3B71B1", // azul gradiente más claro
   });
 
   /*SENDPAD*/

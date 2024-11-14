@@ -102,7 +102,10 @@ export const fetchStores = async () => {
 export const fetchStoreByStoreId = async (store_id) => {
   try {
     const stores = await fetchStores();
-    const store = stores.find((store) => store.store_id === store_id);
+    console.log("stores", stores);
+    console.log("id", store_id);
+    const store = stores.find((store) => store.sto_id === store_id);
+    console.log("result", store);
     return store;
   } catch (error) {
     console.error("Error fetching store:", error);

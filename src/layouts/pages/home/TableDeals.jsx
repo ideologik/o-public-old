@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { Visibility, Lock, Warning, LockOpen } from "@mui/icons-material";
 import {
@@ -11,12 +11,16 @@ import {
   DialogContent,
   DialogContentText,
   Button,
+  CardContent,
+  Card,
+  CardHeader,
+  Typography,
 } from "@mui/material";
+
 import MDSnackbar from "components/MDSnackbar";
 import { fetchDeals, fetchCredit, checkDeal, unlockDeal } from "services";
 import DealDetails from "./DealDetails";
 import MUIDataTable from "mui-datatables";
-import { sort } from "draft-js/lib/DefaultDraftBlockRenderMap";
 
 const TableDeals = ({ filters }) => {
   const [deals, setDeals] = useState([]);
@@ -330,7 +334,7 @@ const TableDeals = ({ filters }) => {
       ) : (
         deals.length > 0 && (
           <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-            <MUIDataTable title={"Deals"} columns={columns} data={deals} options={options} />
+            <MUIDataTable columns={columns} data={deals} options={options} />
           </div>
         )
       )}

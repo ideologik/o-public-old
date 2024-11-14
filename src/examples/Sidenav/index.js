@@ -48,7 +48,7 @@ import {
   setWhiteSidenav,
 } from "context";
 
-function Sidenav({ color, brand, brandName, routes, ...rest }) {
+function Sidenav({ color, brand, brandmini, brandName, routes, ...rest }) {
   const [openCollapse, setOpenCollapse] = useState(false);
   const [openNestedCollapse, setOpenNestedCollapse] = useState(false);
   const [controller, dispatch] = useMaterialUIController();
@@ -94,6 +94,10 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleMiniSidenav);
   }, [dispatch, location]);
+
+  useEffect(() => {
+    console.log("miniSidenav", miniSidenav);
+  }, [miniSidenav]);
 
   // Render all the nested collapse items from the routes.js
   const renderNestedCollapse = (collapse) => {
@@ -263,13 +267,15 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           </MDTypography>
         </MDBox>
         <MDBox component={NavLink} to="/" display="flex" alignItems="center">
-          {brand && <MDBox component="img" src={brand} alt="Brand" width="2rem" />}
+          {brandmini && miniSidenav && (
+            <MDBox component="img" src={brandmini} alt="Brand" width="2rem" />
+          )}
           <MDBox
             width={!brandName && "100%"}
             sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
           >
             <MDTypography component="h6" variant="button" fontWeight="medium" color={textColor}>
-              {brandName}
+              {!brandName && <MDBox component="img" src={brand} alt="Brand" width="9rem" />}
             </MDTypography>
           </MDBox>
         </MDBox>
@@ -295,6 +301,7 @@ Sidenav.defaultProps = {
 Sidenav.propTypes = {
   color: PropTypes.oneOf(["primary", "secondary", "info", "success", "warning", "error", "dark"]),
   brand: PropTypes.string,
+  brandmini: PropTypes.string,
   brandName: PropTypes.string.isRequired,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

@@ -350,6 +350,10 @@ const AliexpressDetail = () => {
                   <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
                     Sale Rank last 90 days: {selectedProduct.bes_salesrank90DaysAverage || "N/A"}
                   </Typography>
+                  <Typography variant="h6" color="textSecondary">
+                    Bought in past month: &nbsp;
+                    {selectedProduct.bes_boughtInPastMonth + "+" || "N/A"}
+                  </Typography>
                   <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
                     Price Trend:{" "}
                     {getTrendIcon(

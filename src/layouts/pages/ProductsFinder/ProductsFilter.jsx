@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {
-  Box,
   Card,
   CardHeader,
   CardContent,
@@ -12,13 +11,15 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import MDBox from "components/MDBox";
 import { fecthDealCategories } from "services";
 
 import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
+import { useFeatureFlags } from "context/FeatureFlags";
 
 const ProductsFilter = ({ onFiltersChange }) => {
+  const { features } = useFeatureFlags();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useAtom(bsSelectedCategoryAtom);
 
@@ -44,7 +45,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
+    <MDBox sx={{ padding: 2 }}>
       <Card>
         <CardHeader
           title={
@@ -52,7 +53,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
               Product Filter
             </Typography>
           }
-          sx={{ backgroundColor: "#735AC7" }}
+          sx={{ backgroundColor: features.colorPrimary }}
         />
         <CardContent style={{ paddingTop: "1.5%" }}>
           <Grid container spacing={2} alignItems="center">
@@ -100,7 +101,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
           </Grid>
         </CardContent>
       </Card>
-    </Box>
+    </MDBox>
   );
 };
 

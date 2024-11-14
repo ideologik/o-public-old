@@ -59,6 +59,7 @@ import MyDeals from "layouts/pages/my-deals/MyDeals";
 import MyDealDetails from "layouts/pages/my-deal-details/MyDealDetails";
 import Support from "layouts/pages/support/Support";
 import ProductsFinder from "layouts/pages/ProductsFinder/ProductsFinder";
+import ShopifyProducts from "layouts/pages/ShopifyProducts/ShopifyProducts";
 import SearchResults from "layouts/pages/ProductsFinder/SearchResult/SearchResult";
 import AliexpressConfig from "layouts/pages/settings/AliexpressConfig";
 import AliexpressDetail from "layouts/pages/ProductsFinder/SearchResult/AliexpressDetail";
@@ -92,7 +93,7 @@ const routes = [
     type: "collapse",
     name: "Home",
     key: "home",
-    icon: <Icon>home</Icon>, // Ícono de MUI para Home
+    icon: <Icon>home</Icon>,
     route: "/home",
     component: <Home />,
     noCollapse: true,
@@ -101,7 +102,7 @@ const routes = [
     type: "collapse",
     name: "My Deals",
     key: "my-deals",
-    icon: <Icon>shopping_cart</Icon>, // Ícono de MUI para Deals
+    icon: <Icon>shopping_cart</Icon>,
     route: "/my-deals",
     component: <MyDeals />,
     noCollapse: true,
@@ -116,7 +117,7 @@ const routes = [
     type: "collapse",
     name: "Products Finder",
     key: "products-finder",
-    icon: <Icon>travel_explore</Icon>, // Ícono de MUI para Deals
+    icon: <Icon>travel_explore</Icon>,
     route: "/products-finder",
     component: <ProductsFinder />,
     noCollapse: true,
@@ -137,18 +138,28 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Aliexpress Config",
-    key: "aliexpressconfig",
-    icon: <Icon>settings</Icon>, // Ícono de MUI para soporte
-    route: "/aliexpressconfig",
-    component: <AliexpressConfig />,
+    name: "Shopify Products",
+    key: "ShopifyProducts",
+    icon: <Icon>inventory</Icon>,
+    route: "/shopify-products",
+    component: <ShopifyProducts />,
     noCollapse: true,
   },
   {
     type: "collapse",
+    name: "Aliexpress Config",
+    key: "aliexpressconfig",
+    icon: <Icon>settings</Icon>,
+    route: "/aliexpressconfig",
+    component: <AliexpressConfig />,
+    noCollapse: true,
+  },
+
+  {
+    type: "collapse",
     name: "Support",
     key: "support",
-    icon: <Icon>support_agent</Icon>, // Ícono de MUI para soporte
+    icon: <Icon>support_agent</Icon>,
     route: "/support",
     component: <Support />,
     noCollapse: true,

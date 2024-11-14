@@ -11,3 +11,13 @@ export const shopifyCreateProduct = async (product) => {
     throw new Error("Error fetching products");
   }
 };
+
+export const shopifyGetProducts = async () => {
+  try {
+    const response = await client.get("Shopify/GetProducts");
+    return response;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw new Error("Error fetching products");
+  }
+};

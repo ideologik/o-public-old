@@ -1,15 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { Visibility, Lock, Warning, LockOpen } from "@mui/icons-material";
-import { CircularProgress, Grid, IconButton, Tooltip } from "@mui/material";
+import {
+  CircularProgress,
+  Grid,
+  IconButton,
+  Tooltip,
+  Card,
+  CardHeader,
+  CardContent,
+  Typography,
+} from "@mui/material";
 import MDSnackbar from "components/MDSnackbar";
 import { useDeal, setDeal } from "context/DealContext";
 import { fetchUserDeals } from "services";
+import { FeatureFlags } from "context/FeatureFlags";
 
 const TableMyDeals = () => {
+  const { features } = useContext(FeatureFlags);
   const [myDeals, setMyDeals] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -133,16 +144,32 @@ const TableMyDeals = () => {
         </Grid>
       ) : (
         myDeals.length > 0 && (
-          <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-            <AgGridReact
-              rowData={myDeals}
-              columnDefs={columns}
-              pagination={true}
-              paginationPageSize={20}
-              domLayout="autoHeight"
-              onGridReady={onGridReady}
-            />
-          </div>
+          <Grid item xs={12} container justifyContent="center" alignItems="center">
+            <Card style={{ width: "100%" }}>
+              {" "}
+              {/* Asegura que la Card ocupe el 100% */}
+              <CardHeader
+                title={
+                  <Typography variant="h6" color="#FFFFFF">
+                    My Deals
+                  </Typography>
+                }
+                sx={{ backgroundColor: features.colorPrimary }}
+              />
+              <CardContent sx={{ paddingTop: "1.5%", width: "100%" }}>
+                <div className="ag-theme-alpine" style={{ width: "100%" }}>
+                  <AgGridReact
+                    rowData={myDeals}
+                    columnDefs={columns}
+                    pagination={true}
+                    paginationPageSize={20}
+                    domLayout="autoHeight"
+                    onGridReady={onGridReady}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </Grid>
         )
       )}
     </Grid>

@@ -108,6 +108,10 @@ const SearchResults = () => {
                           selectedProduct.bes_salesrank90DaysAverage
                         )}
                       </Typography>
+                      <Typography variant="h6" color="textSecondary">
+                        Bought in past month: &nbsp;
+                        {selectedProduct.bes_boughtInPastMonth + "+" || "N/A"}
+                      </Typography>
                       <Typography variant="body2" color="textSecondary">
                         Price Trend:{" "}
                         {getTrendIcon(
@@ -121,10 +125,6 @@ const SearchResults = () => {
                           selectedProduct.bes_newOfferCount,
                           selectedProduct.bes_newOfferCount90DaysAverage
                         )}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Bought in past month: &nbsp;
-                        {selectedProduct.bes_boughtInPastMonth + "+" || "N/A"}
                       </Typography>
                     </CardContent>
                   </Grid>

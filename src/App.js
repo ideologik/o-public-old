@@ -56,8 +56,11 @@ import {
 } from "context";
 
 // Images
-import brandWhite from "assets/images/funnel.png";
-import brandDark from "assets/images/funnel.png";
+import brandWhite from "assets/images/OMEGA_PROJECT_logo.png";
+import brandDark from "assets/images/OMEGA_PROJECT_logo.png";
+
+import brandminiWhite from "assets/images/OMEGA_PROJECT_logo_min.png";
+import brandminiDark from "assets/images/OMEGA_PROJECT_logo_min.png";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -158,7 +161,9 @@ export default function App() {
             <Sidenav
               color={sidenavColor}
               brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-              brandName="Omega"
+              brandmini={
+                (transparentSidenav && !darkMode) || whiteSidenav ? brandminiDark : brandminiWhite
+              }
               routes={routes}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
@@ -182,7 +187,10 @@ export default function App() {
           <Sidenav
             color={sidenavColor}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-            brandName="Omega"
+            brandmini={
+              (transparentSidenav && !darkMode) || whiteSidenav ? brandminiDark : brandminiWhite
+            }
+            brandName=""
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}

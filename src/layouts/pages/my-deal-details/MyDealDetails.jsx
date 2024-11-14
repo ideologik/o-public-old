@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -16,8 +16,10 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import MDButton from "components/MDButton";
 import { reportDeal, fetchUserDealByDealId, fetchStoreByStoreId } from "services";
+import { FeatureFlags } from "context/FeatureFlags";
 
 const DealDetails = () => {
+  const { features } = useContext(FeatureFlags);
   const { state, dispatch } = useDeal();
   const { deal } = state;
   const navigate = useNavigate();
@@ -126,7 +128,7 @@ const DealDetails = () => {
             <Card>
               <CardMedia
                 component="img"
-                image={store?.store_image_url}
+                image={store?.sto_image_url}
                 alt={store?.store_name}
                 sx={{ height: 100, objectFit: "contain" }}
               />
