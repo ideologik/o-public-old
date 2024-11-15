@@ -12,7 +12,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import MDBox from "components/MDBox";
-import { fecthDealCategories } from "services";
+import { fetchDealCategories } from "services";
 
 import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
@@ -21,28 +21,53 @@ import { useFeatureFlags } from "context/FeatureFlags";
 const ProductsFilter = ({ onFiltersChange }) => {
   const { features } = useFeatureFlags();
   const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [thirdLevelCategories, setThirdLevelCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useAtom(bsSelectedCategoryAtom);
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [selectedThirdLevelCategory, setSelectedThirdLevelCategory] = useState("");
 
   useEffect(() => {
-    const fetchDealsGoups = async () => {
-      const productGroups = await fecthDealCategories();
-      setCategories(productGroups.sort());
+    const fetchDealsGroups = async () => {
+      const productGroups = await fetchDealCategories();
+      const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
+      setCategories(sortedCategories);
       if (!selectedCategory) setSelectedCategory("Toys & Games");
     };
-    fetchDealsGoups();
-    handleFilterChange();
+    fetchDealsGroups();
   }, []);
 
   useEffect(() => {
+    const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory);
+    setSubCategories(
+      currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
+    );
+    setSelectedSubCategory(""); // Reinicia el subcategoría seleccionada si cambia la categoría principal
+    setThirdLevelCategories([]); // Reinicia las de tercer nivel
+    setSelectedThirdLevelCategory(""); // Reinicia la seleccionada de tercer nivel
     handleFilterChange();
   }, [selectedCategory]);
 
-  // Función para actualizar los filtros y pasarlos al componente padre
+  useEffect(() => {
+    const currentSubCategory = subCategories.find((sub) => sub.categoryId === selectedSubCategory);
+    setThirdLevelCategories(
+      currentSubCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
+    );
+    setSelectedThirdLevelCategory(""); // Reinicia la seleccionada de tercer nivel
+    handleFilterChange();
+  }, [selectedSubCategory]);
+
+  useEffect(() => {
+    handleFilterChange();
+  }, [selectedThirdLevelCategory]);
+
   const handleFilterChange = () => {
     const newFilters = {
-      AmazonCategory: selectedCategory,
+      mainCategory: selectedCategory,
+      subCategory: selectedSubCategory || null,
+      thirdLevelCategory: selectedThirdLevelCategory || null,
     };
-    onFiltersChange(newFilters); // Pasar los filtros al componente padre
+    onFiltersChange(newFilters);
   };
 
   return (
@@ -65,20 +90,65 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <InputLabel>By category</InputLabel>
                   <Select
                     label="By category"
-                    value={selectedCategory || "any"}
+                    value={selectedCategory || ""}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
                     {categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
+                      <MenuItem key={category.categoryId} value={category.categoryId}>
+                        {category.category}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               )}
             </Grid>
+            {/* Subcategory Filter */}
+            {subCategories.length > 0 && (
+              <Grid item md={12}>
+                <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
+                  <InputLabel>By subcategory</InputLabel>
+                  <Select
+                    label="By subcategory"
+                    value={selectedSubCategory || ""}
+                    onChange={(e) => setSelectedSubCategory(e.target.value)}
+                    autoWidth
+                    sx={{ height: "56px" }}
+                  >
+                    {subCategories.map((subCategory) => (
+                      <MenuItem key={subCategory.categoryId} value={subCategory.categoryId}>
+                        {subCategory.category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+            {/* Third Level Category Filter */}
+            {thirdLevelCategories.length > 0 && (
+              <Grid item md={12}>
+                <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
+                  <InputLabel>By third-level category</InputLabel>
+                  <Select
+                    label="By third-level category"
+                    value={selectedThirdLevelCategory || ""}
+                    onChange={(e) => setSelectedThirdLevelCategory(e.target.value)}
+                    autoWidth
+                    sx={{ height: "56px" }}
+                  >
+                    {thirdLevelCategories.map((thirdLevelCategory) => (
+                      <MenuItem
+                        key={thirdLevelCategory.categoryId}
+                        value={thirdLevelCategory.categoryId}
+                      >
+                        {thirdLevelCategory.category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
           </Grid>
         </CardContent>
       </Card>
@@ -86,7 +156,6 @@ const ProductsFilter = ({ onFiltersChange }) => {
   );
 };
 
-// Props validation
 ProductsFilter.propTypes = {
   onFiltersChange: PropTypes.func.isRequired,
 };

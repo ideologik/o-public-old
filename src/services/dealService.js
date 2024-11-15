@@ -1,7 +1,7 @@
 // src/api/dealService.js
 import client from "services/ApiClient";
 
-export const fecthDealCategories = async () => {
+export const fetchDealCategories = async () => {
   try {
     const response = await client.get("deals/categories?include_child=true");
     return response;
