@@ -3,7 +3,7 @@ import client from "services/ApiClient";
 
 export const fecthDealCategories = async () => {
   try {
-    const response = await client.get("deals/categories");
+    const response = await client.get("deals/categories?include_child=true");
     return response;
   } catch (error) {
     console.error("Error fetching deal categories:", error);
@@ -113,9 +113,17 @@ export const fetchStoreByStoreId = async (store_id) => {
   }
 };
 
-export const productsFinder = async (filters) => {
+export const productsFinder = async ({
+  AmazonCategoyId = null,
+  AmazonSubCategoryId = null,
+  AmazonThirdCategoryId = null,
+  page = 0,
+  total_rows = 10,
+}) => {
   try {
-    const response = await client.get("productfinder", { params: filters });
+    const response = await client.get("productfinder", {
+      params: { AmazonCategoyId, AmazonSubCategoryId, AmazonThirdCategoryId, page, total_rows },
+    });
     return response;
   } catch (error) {
     console.error("Error fetching products:", error);

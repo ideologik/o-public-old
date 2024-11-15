@@ -191,7 +191,7 @@ const SearchResults = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            Select
+                            Analyze
                           </MDButton>
                         </Box>
                       </CardContent>

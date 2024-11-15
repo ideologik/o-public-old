@@ -27,6 +27,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
     const fetchDealsGoups = async () => {
       const productGroups = await fecthDealCategories();
       setCategories(productGroups.sort());
+      if (!selectedCategory) setSelectedCategory("Toys & Games");
     };
     fetchDealsGoups();
     handleFilterChange();
@@ -39,7 +40,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
   // Función para actualizar los filtros y pasarlos al componente padre
   const handleFilterChange = () => {
     const newFilters = {
-      AmazonCategory: selectedCategory === "any" ? "" : selectedCategory,
+      AmazonCategory: selectedCategory,
     };
     onFiltersChange(newFilters); // Pasar los filtros al componente padre
   };
@@ -69,7 +70,6 @@ const ProductsFilter = ({ onFiltersChange }) => {
                     autoWidth
                     sx={{ height: "56px" }}
                   >
-                    <MenuItem value="any">Select Product Type</MenuItem>
                     {categories.map((category) => (
                       <MenuItem key={category} value={category}>
                         {category}
@@ -79,25 +79,6 @@ const ProductsFilter = ({ onFiltersChange }) => {
                 </FormControl>
               )}
             </Grid>
-
-            {/* Search Button */}
-            {/* <Grid item xs={12}>
-              <Box textAlign="center">
-                <IconButton
-                  color="primary"
-                  size="large"
-                  sx={{
-                    backgroundColor: "#735AC7",
-                    color: "#AAAAAA",
-                    padding: 2,
-                    borderRadius: "50%",
-                  }}
-                  onClick={handleFilterChange}
-                >
-                  <Search />
-                </IconButton>
-              </Box>
-            </Grid> */}
           </Grid>
         </CardContent>
       </Card>

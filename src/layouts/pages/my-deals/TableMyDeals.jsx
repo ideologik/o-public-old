@@ -14,7 +14,6 @@ import {
   CardContent,
   Typography,
 } from "@mui/material";
-import MDSnackbar from "components/MDSnackbar";
 import { useDeal, setDeal } from "context/DealContext";
 import { fetchUserDeals } from "services";
 import { FeatureFlags } from "context/FeatureFlags";

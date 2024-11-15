@@ -166,6 +166,10 @@ const CardProducts = ({ filters }) => {
                   Sales Rank: {product.bes_salesrank || "N/A"}{" "}
                   {getTrendIcon(product.bes_salesrank, product.bes_salesrank90DaysAverage)}
                 </Typography>
+                <Typography variant="h6" color="textSecondary">
+                  Bought in past month: &nbsp;
+                  {product.bes_boughtInPastMonth + "+" || "N/A"}
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Price Trend:{" "}
                   {getTrendIcon(product.bes_price, product.bes_priceBuyBox90DaysAverage)}
@@ -194,7 +198,7 @@ const CardProducts = ({ filters }) => {
                       )
                     }
                   >
-                    Select Product
+                    Find potential products
                   </MDButton>
                 </Box>
               </CardContent>

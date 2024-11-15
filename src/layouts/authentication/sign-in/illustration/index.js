@@ -108,7 +108,7 @@ function Illustration() {
               "userPicture",
               "https://cdn-icons-png.flaticon.com/512/149/149071.png"
             );
-            navigate("/home");
+            navigate("/products-finder");
             window.location.reload();
           } else setErrorSB(true);
         }

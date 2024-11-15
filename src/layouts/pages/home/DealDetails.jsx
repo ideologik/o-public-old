@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,8 +12,10 @@ import {
 import MDBox from "components/MDBox"; // Componente del template Material Dashboard
 import MDButton from "components/MDButton"; // Componente del template Material Dashboard
 import { useDeal, setDeal } from "context/DealContext";
+import { FeatureFlags } from "context/FeatureFlags";
 
 const DealDetails = ({ selectedDeal, openModal, handleCloseModal }) => {
+  const { features } = useContext(FeatureFlags);
   console.log("selectedDeal", selectedDeal);
   const { state, dispatch } = useDeal();
   const navigate = useNavigate();
@@ -24,7 +26,9 @@ const DealDetails = ({ selectedDeal, openModal, handleCloseModal }) => {
   };
   return (
     <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="md">
-      <DialogTitle style={{ textAlign: "center", backgroundColor: "#735AC7", color: "#FFFFFF" }}>
+      <DialogTitle
+        style={{ textAlign: "center", backgroundColor: features.colorPrimary, color: "#FFFFFF" }}
+      >
         Deal Details
       </DialogTitle>
       <DialogContent dividers>

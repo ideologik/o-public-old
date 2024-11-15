@@ -99,7 +99,8 @@ const AliexpressDetail = () => {
       const data = await fetchPromise;
       setAdditionalInfo(data);
       if (data) {
-        setSelectedImages([0]);
+        //seleccionar todaslas imagenes
+        setSelectedImages([...Array(data.imageURLs.length).keys()]);
         setSelectedTitle(null);
         setSelectedDescription(null);
         setOpenPopup(true);
@@ -279,7 +280,6 @@ const AliexpressDetail = () => {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
       <MDBox display="flex" justifyContent="center" bgcolor="inherit" padding={4}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
@@ -410,7 +410,7 @@ const AliexpressDetail = () => {
                       }}
                       onClick={() => fetchAdditionalInfo()}
                     >
-                      Edit & Publish Product
+                      Add to My Products
                     </MDButton>
                   )}
                 </CardContent>
