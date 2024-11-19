@@ -17,16 +17,24 @@ function AliexpressConfig() {
   useEffect(() => {
     const handleCreateAuth = async () => {
       try {
-        // Primero, verifica el estado de autenticación
-        const authStatus = await statusAuth();
-        const { status } = authStatus;
+        // // Primero, verifica el estado de autenticación
+        // const authStatus = await statusAuth();
+        // const { status } = authStatus;
 
-        if (status === "Connected") {
-          // Mostrar mensaje si ya está conectado
-          setMessage("Already connected to AliExpress.");
-          setMessageType("success");
-        } else if (ok === null) {
-          // Si no está conectado y ok es null, intenta crear la autenticación
+        // if (status === "Connected") {
+        //   // Mostrar mensaje si ya está conectado
+        //   setMessage("Already connected to AliExpress.");
+        //   setMessageType("success");
+        // } else if (ok === null) {
+        //   // Si no está conectado y ok es null, intenta crear la autenticación
+        //   const response = await createAuth();
+        //   if (response) {
+        //     // Redirigir a la URL proporcionada en la respuesta
+        //     window.location.href = response;
+        //   }
+        // }
+        if (ok === null) {
+          // Si ok es null, intenta crear la autenticación
           const response = await createAuth();
           if (response) {
             // Redirigir a la URL proporcionada en la respuesta
@@ -41,7 +49,7 @@ function AliexpressConfig() {
     };
 
     handleCreateAuth();
-  }, [ok]);
+  }, []);
 
   // Show alerts based on the query parameter
   useEffect(() => {
