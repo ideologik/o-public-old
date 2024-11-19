@@ -9,17 +9,23 @@ import { bsSelectedCategorytAtom } from "stores/productAtom";
 function ProductsFinder() {
   // Estado para almacenar los filtros seleccionados
   const [filters, setFilters] = useState({});
+  const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
 
   // Función que se pasa a SearchFilter para actualizar los filtros
   const handleFiltersChange = (newFilters) => {
+    const { isCategoriesLoaded, ...filters } = newFilters;
     console.log("filters", newFilters);
-    setFilters({ ...newFilters });
+    console.log("filters", filters);
+    setFilters({ ...filters });
+    if (newFilters.isCategoriesLoaded !== undefined) {
+      setIsCategoriesLoaded(newFilters.isCategoriesLoaded);
+    }
   };
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <ProductsFilter onFiltersChange={handleFiltersChange} />
-      <CardProducts filters={filters} />
+      {isCategoriesLoaded ? <CardProducts filters={filters} /> : null}
     </DashboardLayout>
   );
 }

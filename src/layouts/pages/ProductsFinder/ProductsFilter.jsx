@@ -12,7 +12,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import MDBox from "components/MDBox";
-import { fetchDealCategories } from "services";
+import { fetchDealCategories, fetchDealSubCategories } from "services";
 
 import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
@@ -43,9 +43,13 @@ const ProductsFilter = ({ onFiltersChange }) => {
 
   const [selectedCategoryState, setSelectedCategoryState] = useAtom(bsSelectedCategoryAtom);
 
+  const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
+
   // Fetch and clean categories on mount
   useEffect(() => {
     const fetchDealsGroups = async () => {
+      console.log("entro en fetchDealsGroups");
+      setIsCategoriesLoaded(false);
       const productGroups = await fetchDealCategories();
       const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
 
@@ -58,6 +62,8 @@ const ProductsFilter = ({ onFiltersChange }) => {
 
       const cleanedCategories = removeDuplicateCategories(sortedCategories);
       setCategories(cleanedCategories);
+      setIsCategoriesLoaded(true);
+      console.log("lo pone  a true a setIsCategoriesLoaded");
 
       // Establecer categoría predeterminada y subcategorías si no hay categoría seleccionada
       if (!selectedCategoryState.categoryId) {
@@ -129,7 +135,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
   // Actualizar los filtros cuando cambie cualquier parte del estado seleccionado
   useEffect(() => {
     handleFilterChange();
-  }, [selectedCategoryState]);
+  }, [selectedCategoryState, isCategoriesLoaded]);
 
   const handleCategoryChange = (level, value) => {
     setSelectedCategoryState((prev) => {
@@ -163,6 +169,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
       AmazonCategoryId: selectedCategoryState.categoryId,
       AmazonSubCategoryId: selectedCategoryState.subCategoryId,
       AmazonThirdCategoryId: selectedCategoryState.thirdLevelCategoryId,
+      isCategoriesLoaded,
     });
   };
 

@@ -3,7 +3,18 @@ import client from "services/ApiClient";
 
 export const fetchDealCategories = async () => {
   try {
-    const response = await client.get("deals/categories?include_child=true");
+    const response = await client.get("deals/categories?include_child=false");
+    return response;
+  } catch (error) {
+    console.error("Error fetching deal categories:", error);
+    throw error;
+  }
+};
+export const fetchDealSubCategories = async (parent_categoryId) => {
+  try {
+    const response = await client.get(
+      `deals/subcategories?include_child=true&parent_categoryId=${parent_categoryId}`
+    );
     return response;
   } catch (error) {
     console.error("Error fetching deal categories:", error);
