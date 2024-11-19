@@ -116,9 +116,9 @@ const ProductsFilter = ({ onFiltersChange }) => {
 
   const handleFilterChange = () => {
     const newFilters = {
-      mainCategory: selectedCategory,
-      subCategory: selectedSubCategory || null,
-      thirdLevelCategory: selectedThirdLevelCategory || null,
+      AmazonCategoryId: selectedCategory,
+      AmazonSubCategoryId: selectedSubCategory || null,
+      AmazonThirdCategoryId: selectedThirdLevelCategory || null,
     };
     onFiltersChange(newFilters);
   };
@@ -144,7 +144,11 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <Select
                     label="By category"
                     value={selectedCategory ?? ""}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedCategory(e.target.value); // Cambia la categoría principal
+                      setSelectedSubCategory(""); // Deselecciona la subcategoría
+                      setSelectedThirdLevelCategory(""); // Deselecciona la categoría de tercer nivel
+                    }}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
@@ -165,7 +169,10 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <Select
                     label="By subcategory"
                     value={selectedSubCategory || ""}
-                    onChange={(e) => setSelectedSubCategory(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedSubCategory(e.target.value); // Cambia la subcategoría
+                      setSelectedThirdLevelCategory(""); // Deselecciona la categoría de tercer nivel
+                    }}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
