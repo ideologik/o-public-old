@@ -43,12 +43,12 @@ const ProductsFilter = ({ onFiltersChange }) => {
 
   const [selectedCategoryState, setSelectedCategoryState] = useAtom(bsSelectedCategoryAtom);
 
+  // Fetch and clean categories on mount
   useEffect(() => {
     const fetchDealsGroups = async () => {
       const productGroups = await fetchDealCategories();
       const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
 
-      // Filtrar categorías y subcategorías vacías
       sortedCategories.forEach((cat) => {
         cat.subCategories = cat.subCategories.filter((sub) => sub.category !== "");
         cat.subCategories.forEach((sub) => {
@@ -59,7 +59,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
       const cleanedCategories = removeDuplicateCategories(sortedCategories);
       setCategories(cleanedCategories);
 
-      // Inicializar categoría predeterminada si no hay una seleccionada
+      // Establecer categoría predeterminada y subcategorías si no hay categoría seleccionada
       if (!selectedCategoryState.categoryId) {
         const defaultCategory = cleanedCategories.find((cat) => cat.category === "Toys & Games");
         if (defaultCategory) {
@@ -68,9 +68,11 @@ const ProductsFilter = ({ onFiltersChange }) => {
             subCategoryId: null,
             thirdLevelCategoryId: null,
           });
+          setSubCategories(defaultCategory.subCategories || []);
         }
       } else {
-        const currentCategory = sortedCategories.find(
+        // Si ya hay una categoría seleccionada, establece las subcategorías correspondientes
+        const currentCategory = cleanedCategories.find(
           (cat) => cat.categoryId === selectedCategoryState.categoryId
         );
         setSubCategories(currentCategory?.subCategories || []);
@@ -80,43 +82,81 @@ const ProductsFilter = ({ onFiltersChange }) => {
     fetchDealsGroups();
   }, []);
 
+  // Actualizar subcategorías cuando cambia la categoría seleccionada o las categorías se cargan
   useEffect(() => {
+    if (!categories.length) return; // Esperar a que las categorías se carguen
+
     const currentCategory = categories.find(
       (cat) => cat.categoryId === selectedCategoryState.categoryId
     );
     setSubCategories(currentCategory?.subCategories || []);
 
     if (!currentCategory || !currentCategory.subCategories?.length) {
-      setSelectedCategoryState((prev) => ({
-        ...prev,
-        subCategoryId: null,
-        thirdLevelCategoryId: null,
-      }));
+      // Solo actualizar si hay cambios para evitar sobrescrituras innecesarias
+      if (
+        selectedCategoryState.subCategoryId !== null ||
+        selectedCategoryState.thirdLevelCategoryId !== null
+      ) {
+        setSelectedCategoryState((prev) => ({
+          ...prev,
+          subCategoryId: null,
+          thirdLevelCategoryId: null,
+        }));
+      }
       setThirdLevelCategories([]);
     }
+  }, [selectedCategoryState.categoryId, categories]);
 
-    handleFilterChange();
-  }, [selectedCategoryState.categoryId]);
-
+  // Actualizar categorías de tercer nivel cuando cambia la subcategoría seleccionada o las subcategorías se cargan
   useEffect(() => {
+    if (!subCategories.length) return; // Esperar a que las subcategorías se carguen
+
     const currentSubCategory = subCategories.find(
       (sub) => sub.categoryId === selectedCategoryState.subCategoryId
     );
     setThirdLevelCategories(currentSubCategory?.subCategories || []);
 
     if (!currentSubCategory || !currentSubCategory.subCategories?.length) {
-      setSelectedCategoryState((prev) => ({
-        ...prev,
-        thirdLevelCategoryId: null,
-      }));
+      if (selectedCategoryState.thirdLevelCategoryId !== null) {
+        setSelectedCategoryState((prev) => ({
+          ...prev,
+          thirdLevelCategoryId: null,
+        }));
+      }
     }
+  }, [selectedCategoryState.subCategoryId, subCategories]);
 
-    handleFilterChange();
-  }, [selectedCategoryState.subCategoryId]);
-
+  // Actualizar los filtros cuando cambie cualquier parte del estado seleccionado
   useEffect(() => {
     handleFilterChange();
-  }, [selectedCategoryState.thirdLevelCategoryId]);
+  }, [selectedCategoryState]);
+
+  const handleCategoryChange = (level, value) => {
+    setSelectedCategoryState((prev) => {
+      if (level === "category") {
+        return {
+          ...prev,
+          categoryId: value,
+          subCategoryId: null,
+          thirdLevelCategoryId: null,
+        };
+      }
+      if (level === "subCategory") {
+        return {
+          ...prev,
+          subCategoryId: value,
+          thirdLevelCategoryId: null,
+        };
+      }
+      if (level === "thirdLevelCategory") {
+        return {
+          ...prev,
+          thirdLevelCategoryId: value,
+        };
+      }
+      return prev;
+    });
+  };
 
   const handleFilterChange = () => {
     onFiltersChange({
@@ -147,13 +187,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <Select
                     label="By category"
                     value={selectedCategoryState.categoryId || ""}
-                    onChange={(e) =>
-                      setSelectedCategoryState({
-                        categoryId: e.target.value,
-                        subCategoryId: null,
-                        thirdLevelCategoryId: null,
-                      })
-                    }
+                    onChange={(e) => handleCategoryChange("category", e.target.value)}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
@@ -174,13 +208,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <Select
                     label="By subcategory"
                     value={selectedCategoryState.subCategoryId || ""}
-                    onChange={(e) =>
-                      setSelectedCategoryState((prev) => ({
-                        ...prev,
-                        subCategoryId: e.target.value,
-                        thirdLevelCategoryId: null,
-                      }))
-                    }
+                    onChange={(e) => handleCategoryChange("subCategory", e.target.value)}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
@@ -201,12 +229,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <Select
                     label="By third-level category"
                     value={selectedCategoryState.thirdLevelCategoryId || ""}
-                    onChange={(e) =>
-                      setSelectedCategoryState((prev) => ({
-                        ...prev,
-                        thirdLevelCategoryId: e.target.value,
-                      }))
-                    }
+                    onChange={(e) => handleCategoryChange("thirdLevelCategory", e.target.value)}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
