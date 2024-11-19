@@ -32,7 +32,17 @@ const ProductsFilter = ({ onFiltersChange }) => {
       const productGroups = await fetchDealCategories();
       const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
       setCategories(sortedCategories);
-      if (!selectedCategory) setSelectedCategory("Toys & Games");
+
+      // Inicializar selectedCategory con "Toys & Games" si no está definido
+      if (!selectedCategory) {
+        setSelectedCategory("Toys & Games");
+      } else {
+        // Si selectedCategory ya tiene un valor, inicializar subcategorías
+        const currentCategory = sortedCategories.find((cat) => cat.categoryId === selectedCategory);
+        setSubCategories(
+          currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
+        );
+      }
     };
     fetchDealsGroups();
   }, []);
@@ -42,9 +52,14 @@ const ProductsFilter = ({ onFiltersChange }) => {
     setSubCategories(
       currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
     );
-    setSelectedSubCategory(""); // Reinicia el subcategoría seleccionada si cambia la categoría principal
-    setThirdLevelCategories([]); // Reinicia las de tercer nivel
-    setSelectedThirdLevelCategory(""); // Reinicia la seleccionada de tercer nivel
+
+    // Si la categoría seleccionada no tiene subcategorías, limpiar los subniveles
+    if (!currentCategory?.subCategories.length) {
+      setSelectedSubCategory("");
+      setThirdLevelCategories([]);
+      setSelectedThirdLevelCategory("");
+    }
+
     handleFilterChange();
   }, [selectedCategory]);
 
@@ -53,7 +68,12 @@ const ProductsFilter = ({ onFiltersChange }) => {
     setThirdLevelCategories(
       currentSubCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
     );
-    setSelectedThirdLevelCategory(""); // Reinicia la seleccionada de tercer nivel
+
+    // Si la subcategoría seleccionada no tiene tercer nivel, limpiar el tercer nivel
+    if (!currentSubCategory?.subCategories.length) {
+      setSelectedThirdLevelCategory("");
+    }
+
     handleFilterChange();
   }, [selectedSubCategory]);
 
