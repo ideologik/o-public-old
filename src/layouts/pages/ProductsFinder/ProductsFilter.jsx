@@ -18,11 +18,39 @@ import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
 import { useFeatureFlags } from "context/FeatureFlags";
 
+const data = [
+  // Tu JSON aquí
+];
+
+// Función recursiva para eliminar categorías duplicadas
+function removeDuplicateCategories(categories, seenIds = new Set()) {
+  return categories
+    .filter((category) => {
+      if (seenIds.has(category.categoryId)) {
+        return false; // Excluye categorías duplicadas
+      } else {
+        seenIds.add(category.categoryId); // Agrega el ID al Set
+        return true; // Incluye la categoría
+      }
+    })
+    .map((category) => ({
+      ...category,
+      subCategories: removeDuplicateCategories(category.subCategories, seenIds), // Limpia subcategorías recursivamente
+    }));
+}
+
+// Llama a la función
+const cleanedData = removeDuplicateCategories(data);
+
+console.log(JSON.stringify(cleanedData, null, 2));
+
 const ProductsFilter = ({ onFiltersChange }) => {
   const { features } = useFeatureFlags();
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [thirdLevelCategories, setThirdLevelCategories] = useState([]);
+
+  // Inicializa el estado con "Toys & Games" si no hay una categoría seleccionada
   const [selectedCategory, setSelectedCategory] = useAtom(bsSelectedCategoryAtom);
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedThirdLevelCategory, setSelectedThirdLevelCategory] = useState("");
@@ -30,20 +58,34 @@ const ProductsFilter = ({ onFiltersChange }) => {
   useEffect(() => {
     const fetchDealsGroups = async () => {
       const productGroups = await fetchDealCategories();
-      const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
-      setCategories(sortedCategories);
+      let sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
+      // borrar todas los items cuya descripcion sea ""
+      sortedCategories.forEach((cat) => {
+        cat.subCategories = cat.subCategories.filter((sub) => sub.category !== "");
+        cat.subCategories.forEach((sub) => {
+          sub.subCategories = sub.subCategories.filter((sub2) => sub2.category !== "");
+        });
+      });
+      sortedCategories = removeDuplicateCategories(sortedCategories);
 
-      // Inicializar selectedCategory con "Toys & Games" si no está definido
-      if (!selectedCategory) {
-        setSelectedCategory("Toys & Games");
-      } else {
-        // Si selectedCategory ya tiene un valor, inicializar subcategorías
+      setCategories(sortedCategories);
+      console.log("sortedCategories", sortedCategories);
+
+      // Encuentra "Toys & Games" y establece su categoryId como seleccionado
+      const defaultCategory = sortedCategories.find((cat) => cat.category === "Toys & Games");
+      console.log("defaultCategory", defaultCategory);
+
+      if (!selectedCategory && defaultCategory) {
+        setSelectedCategory(defaultCategory.categoryId);
+      } else if (selectedCategory) {
+        // Inicializa subcategorías si selectedCategory ya tiene un valor
         const currentCategory = sortedCategories.find((cat) => cat.categoryId === selectedCategory);
         setSubCategories(
           currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
         );
       }
     };
+
     fetchDealsGroups();
   }, []);
 
@@ -53,8 +95,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
       currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
     );
 
-    // Si la categoría seleccionada no tiene subcategorías, limpiar los subniveles
-    if (!currentCategory?.subCategories.length) {
+    if (!currentCategory?.subCategories?.length) {
       setSelectedSubCategory("");
       setThirdLevelCategories([]);
       setSelectedThirdLevelCategory("");
@@ -69,8 +110,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
       currentSubCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
     );
 
-    // Si la subcategoría seleccionada no tiene tercer nivel, limpiar el tercer nivel
-    if (!currentSubCategory?.subCategories.length) {
+    if (!currentSubCategory?.subCategories?.length) {
       setSelectedThirdLevelCategory("");
     }
 
