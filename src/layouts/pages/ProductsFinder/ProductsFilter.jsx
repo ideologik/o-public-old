@@ -59,30 +59,25 @@ const ProductsFilter = ({ onFiltersChange }) => {
     const fetchDealsGroups = async () => {
       const productGroups = await fetchDealCategories();
       let sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
-      // borrar todas los items cuya descripcion sea ""
+
+      // Filtrar categorías y subcategorías vacías
       sortedCategories.forEach((cat) => {
         cat.subCategories = cat.subCategories.filter((sub) => sub.category !== "");
         cat.subCategories.forEach((sub) => {
           sub.subCategories = sub.subCategories.filter((sub2) => sub2.category !== "");
         });
       });
+
       sortedCategories = removeDuplicateCategories(sortedCategories);
-
       setCategories(sortedCategories);
-      console.log("sortedCategories", sortedCategories);
 
-      // Encuentra "Toys & Games" y establece su categoryId como seleccionado
-      const defaultCategory = sortedCategories.find((cat) => cat.category === "Toys & Games");
-      console.log("defaultCategory", defaultCategory);
-
-      if (!selectedCategory && defaultCategory) {
-        setSelectedCategory(defaultCategory.categoryId);
-      } else if (selectedCategory) {
-        // Inicializa subcategorías si selectedCategory ya tiene un valor
+      // Sincronizar estado inicial
+      if (!selectedCategory) {
+        const defaultCategory = sortedCategories.find((cat) => cat.category === "Toys & Games");
+        setSelectedCategory(defaultCategory?.categoryId || "");
+      } else {
         const currentCategory = sortedCategories.find((cat) => cat.categoryId === selectedCategory);
-        setSubCategories(
-          currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
-        );
+        setSubCategories(currentCategory?.subCategories || []);
       }
     };
 
@@ -90,12 +85,11 @@ const ProductsFilter = ({ onFiltersChange }) => {
   }, []);
 
   useEffect(() => {
+    // Sincronizar subcategorías según la categoría seleccionada
     const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory);
-    setSubCategories(
-      currentCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
-    );
+    setSubCategories(currentCategory?.subCategories || []);
 
-    if (!currentCategory?.subCategories?.length) {
+    if (!currentCategory || !currentCategory.subCategories?.length) {
       setSelectedSubCategory("");
       setThirdLevelCategories([]);
       setSelectedThirdLevelCategory("");
@@ -105,12 +99,11 @@ const ProductsFilter = ({ onFiltersChange }) => {
   }, [selectedCategory]);
 
   useEffect(() => {
+    // Sincronizar tercer nivel según la subcategoría seleccionada
     const currentSubCategory = subCategories.find((sub) => sub.categoryId === selectedSubCategory);
-    setThirdLevelCategories(
-      currentSubCategory?.subCategories.sort((a, b) => a.category.localeCompare(b.category)) || []
-    );
+    setThirdLevelCategories(currentSubCategory?.subCategories || []);
 
-    if (!currentSubCategory?.subCategories?.length) {
+    if (!currentSubCategory || !currentSubCategory.subCategories?.length) {
       setSelectedThirdLevelCategory("");
     }
 
@@ -150,7 +143,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <InputLabel>By category</InputLabel>
                   <Select
                     label="By category"
-                    value={selectedCategory || ""}
+                    value={selectedCategory ?? ""}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     autoWidth
                     sx={{ height: "56px" }}
