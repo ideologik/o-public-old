@@ -18,10 +18,6 @@ import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
 import { useFeatureFlags } from "context/FeatureFlags";
 
-const data = [
-  // Tu JSON aquí
-];
-
 // Función recursiva para eliminar categorías duplicadas
 function removeDuplicateCategories(categories, seenIds = new Set()) {
   return categories
@@ -39,26 +35,18 @@ function removeDuplicateCategories(categories, seenIds = new Set()) {
     }));
 }
 
-// Llama a la función
-const cleanedData = removeDuplicateCategories(data);
-
-console.log(JSON.stringify(cleanedData, null, 2));
-
 const ProductsFilter = ({ onFiltersChange }) => {
   const { features } = useFeatureFlags();
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [thirdLevelCategories, setThirdLevelCategories] = useState([]);
 
-  // Inicializa el estado con "Toys & Games" si no hay una categoría seleccionada
-  const [selectedCategory, setSelectedCategory] = useAtom(bsSelectedCategoryAtom);
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
-  const [selectedThirdLevelCategory, setSelectedThirdLevelCategory] = useState("");
+  const [selectedCategoryState, setSelectedCategoryState] = useAtom(bsSelectedCategoryAtom);
 
   useEffect(() => {
     const fetchDealsGroups = async () => {
       const productGroups = await fetchDealCategories();
-      let sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
+      const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
 
       // Filtrar categorías y subcategorías vacías
       sortedCategories.forEach((cat) => {
@@ -68,15 +56,23 @@ const ProductsFilter = ({ onFiltersChange }) => {
         });
       });
 
-      sortedCategories = removeDuplicateCategories(sortedCategories);
-      setCategories(sortedCategories);
+      const cleanedCategories = removeDuplicateCategories(sortedCategories);
+      setCategories(cleanedCategories);
 
-      // Sincronizar estado inicial
-      if (!selectedCategory) {
-        const defaultCategory = sortedCategories.find((cat) => cat.category === "Toys & Games");
-        setSelectedCategory(defaultCategory?.categoryId || "");
+      // Inicializar categoría predeterminada si no hay una seleccionada
+      if (!selectedCategoryState.categoryId) {
+        const defaultCategory = cleanedCategories.find((cat) => cat.category === "Toys & Games");
+        if (defaultCategory) {
+          setSelectedCategoryState({
+            categoryId: defaultCategory.categoryId,
+            subCategoryId: null,
+            thirdLevelCategoryId: null,
+          });
+        }
       } else {
-        const currentCategory = sortedCategories.find((cat) => cat.categoryId === selectedCategory);
+        const currentCategory = sortedCategories.find(
+          (cat) => cat.categoryId === selectedCategoryState.categoryId
+        );
         setSubCategories(currentCategory?.subCategories || []);
       }
     };
@@ -85,42 +81,49 @@ const ProductsFilter = ({ onFiltersChange }) => {
   }, []);
 
   useEffect(() => {
-    // Sincronizar subcategorías según la categoría seleccionada
-    const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory);
+    const currentCategory = categories.find(
+      (cat) => cat.categoryId === selectedCategoryState.categoryId
+    );
     setSubCategories(currentCategory?.subCategories || []);
 
     if (!currentCategory || !currentCategory.subCategories?.length) {
-      setSelectedSubCategory("");
+      setSelectedCategoryState((prev) => ({
+        ...prev,
+        subCategoryId: null,
+        thirdLevelCategoryId: null,
+      }));
       setThirdLevelCategories([]);
-      setSelectedThirdLevelCategory("");
     }
 
     handleFilterChange();
-  }, [selectedCategory]);
+  }, [selectedCategoryState.categoryId]);
 
   useEffect(() => {
-    // Sincronizar tercer nivel según la subcategoría seleccionada
-    const currentSubCategory = subCategories.find((sub) => sub.categoryId === selectedSubCategory);
+    const currentSubCategory = subCategories.find(
+      (sub) => sub.categoryId === selectedCategoryState.subCategoryId
+    );
     setThirdLevelCategories(currentSubCategory?.subCategories || []);
 
     if (!currentSubCategory || !currentSubCategory.subCategories?.length) {
-      setSelectedThirdLevelCategory("");
+      setSelectedCategoryState((prev) => ({
+        ...prev,
+        thirdLevelCategoryId: null,
+      }));
     }
 
     handleFilterChange();
-  }, [selectedSubCategory]);
+  }, [selectedCategoryState.subCategoryId]);
 
   useEffect(() => {
     handleFilterChange();
-  }, [selectedThirdLevelCategory]);
+  }, [selectedCategoryState.thirdLevelCategoryId]);
 
   const handleFilterChange = () => {
-    const newFilters = {
-      AmazonCategoryId: selectedCategory,
-      AmazonSubCategoryId: selectedSubCategory || null,
-      AmazonThirdCategoryId: selectedThirdLevelCategory || null,
-    };
-    onFiltersChange(newFilters);
+    onFiltersChange({
+      AmazonCategoryId: selectedCategoryState.categoryId,
+      AmazonSubCategoryId: selectedCategoryState.subCategoryId,
+      AmazonThirdCategoryId: selectedCategoryState.thirdLevelCategoryId,
+    });
   };
 
   return (
@@ -143,12 +146,14 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <InputLabel>By category</InputLabel>
                   <Select
                     label="By category"
-                    value={selectedCategory ?? ""}
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value); // Cambia la categoría principal
-                      setSelectedSubCategory(""); // Deselecciona la subcategoría
-                      setSelectedThirdLevelCategory(""); // Deselecciona la categoría de tercer nivel
-                    }}
+                    value={selectedCategoryState.categoryId || ""}
+                    onChange={(e) =>
+                      setSelectedCategoryState({
+                        categoryId: e.target.value,
+                        subCategoryId: null,
+                        thirdLevelCategoryId: null,
+                      })
+                    }
                     autoWidth
                     sx={{ height: "56px" }}
                   >
@@ -168,11 +173,14 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <InputLabel>By subcategory</InputLabel>
                   <Select
                     label="By subcategory"
-                    value={selectedSubCategory || ""}
-                    onChange={(e) => {
-                      setSelectedSubCategory(e.target.value); // Cambia la subcategoría
-                      setSelectedThirdLevelCategory(""); // Deselecciona la categoría de tercer nivel
-                    }}
+                    value={selectedCategoryState.subCategoryId || ""}
+                    onChange={(e) =>
+                      setSelectedCategoryState((prev) => ({
+                        ...prev,
+                        subCategoryId: e.target.value,
+                        thirdLevelCategoryId: null,
+                      }))
+                    }
                     autoWidth
                     sx={{ height: "56px" }}
                   >
@@ -192,8 +200,13 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <InputLabel>By third-level category</InputLabel>
                   <Select
                     label="By third-level category"
-                    value={selectedThirdLevelCategory || ""}
-                    onChange={(e) => setSelectedThirdLevelCategory(e.target.value)}
+                    value={selectedCategoryState.thirdLevelCategoryId || ""}
+                    onChange={(e) =>
+                      setSelectedCategoryState((prev) => ({
+                        ...prev,
+                        thirdLevelCategoryId: e.target.value,
+                      }))
+                    }
                     autoWidth
                     sx={{ height: "56px" }}
                   >
