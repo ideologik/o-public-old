@@ -35,7 +35,7 @@ const CardProducts = ({ filters }) => {
 
   const fetchProductsData = async (currentPage, showLoading = false) => {
     console.log("filters", filters);
-    if (Object.keys(filters).length === 0 || filters.AmazonCategory === null) {
+    if (Object.keys(filters).length === 0 || filters.AmazonCategoryId === null) {
       setProducts([]);
       return;
     }
@@ -227,7 +227,7 @@ const CardProducts = ({ filters }) => {
 
 CardProducts.propTypes = {
   filters: PropTypes.shape({
-    AmazonCategory: PropTypes.string,
+    AmazonCategoryId: PropTypes.string,
   }),
 };
 
