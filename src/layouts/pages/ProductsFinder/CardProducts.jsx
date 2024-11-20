@@ -7,6 +7,7 @@ import MDSnackbar from "components/MDSnackbar";
 import { productsFinder } from "services";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "./cardProductsStyle.css";
 import MDButton from "components/MDButton";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
 import { useAtom } from "jotai";
@@ -132,28 +133,69 @@ const CardProducts = ({ filters }) => {
             key={index}
             ref={index === products.length - 1 ? lastProductRef : null}
           >
-            <Card>
-              <Slider {...sliderSettings} style={{ cursor: "grab" }}>
-                {images.map((image, imgIndex) => (
-                  <img
-                    key={imgIndex}
-                    src={image}
-                    alt={`${product.bes_title} - ${imgIndex}`}
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      objectFit: "contain",
-                      cursor: "pointer",
-                    }}
-                  />
-                ))}
-              </Slider>
-              <CardContent style={{ paddingTop: "3vh" }}>
+            <Card
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                style={{
+                  height: "30vh",
+                  overflow: "hidden",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Slider
+                  {...sliderSettings}
+                  adaptiveHeight={true}
+                  dots={false}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    cursor: "grab",
+                  }}
+                >
+                  {images.map((image, imgIndex) => (
+                    <div
+                      key={imgIndex}
+                      className="slick-slide"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "100%",
+                      }}
+                    >
+                      <img
+                        src={image}
+                        alt={`${product.bes_title} - ${imgIndex}`}
+                        style={{
+                          maxWidth: "100%",
+                          maxHeight: "100%",
+                          objectFit: "contain",
+                          display: "block",
+                        }}
+                      />
+                    </div>
+                  ))}
+                </Slider>
+              </div>
+              <CardContent style={{ padding: "1rem", flex: 1 }}>
                 <Tooltip title={product.bes_title}>
-                  <Typography variant="h6">
-                    {product.bes_title.length > 40
-                      ? `${product.bes_title.slice(0, 40)}...`
-                      : product.bes_title}
+                  <Typography
+                    variant="h6"
+                    style={{
+                      whiteSpace: "nowrap", // Asegura que el texto no se divida en varias líneas
+                      overflow: "hidden", // Oculta el texto que no cabe en el contenedor
+                      textOverflow: "ellipsis", // Añade "..." al final si el texto es demasiado largo
+                    }}
+                  >
+                    {product.bes_title}
                   </Typography>
                 </Tooltip>
                 <Typography variant="body2" color="textSecondary">
@@ -178,13 +220,7 @@ const CardProducts = ({ filters }) => {
                   Competition Trend:{" "}
                   {getTrendIcon(product.bes_newOfferCount, product.bes_newOfferCount90DaysAverage)}
                 </Typography>
-                <Box
-                  mt={12}
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  style={{ marginTop: "2vh" }}
-                >
+                <Box mt={2} display="flex" justifyContent="center" alignItems="center">
                   <MDButton
                     variant="contained"
                     fullWidth
