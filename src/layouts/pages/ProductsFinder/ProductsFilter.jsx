@@ -115,12 +115,22 @@ const ProductsFilter = ({ onFiltersChange }) => {
 
   // Actualizar categorías de tercer nivel cuando cambia la subcategoría seleccionada o las subcategorías se cargan
   useEffect(() => {
+    const fetchThirdLevelCategories = async (id) => {
+      const thirdLevelCategories = await fetchDealSubCategories(id);
+      return thirdLevelCategories;
+    };
+
     if (!subCategories.length) return; // Esperar a que las subcategorías se carguen
 
     const currentSubCategory = subCategories.find(
       (sub) => sub.categoryId === selectedCategoryState.subCategoryId
     );
-    setThirdLevelCategories(currentSubCategory?.subCategories || []);
+    console.log("currentCategory", currentSubCategory);
+    if (currentSubCategory) {
+      fetchThirdLevelCategories(currentSubCategory.categoryId).then((thirdLevelCategories) => {
+        setThirdLevelCategories(thirdLevelCategories);
+      });
+    }
 
     if (!currentSubCategory || !currentSubCategory.subCategories?.length) {
       if (selectedCategoryState.thirdLevelCategoryId !== null) {
