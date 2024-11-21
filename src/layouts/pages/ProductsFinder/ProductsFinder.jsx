@@ -3,8 +3,6 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import ProductsFilter from "./ProductsFilter";
 import CardProducts from "./CardProducts";
-import { useAtom } from "jotai";
-import { bsSelectedCategorytAtom } from "stores/productAtom";
 
 function ProductsFinder() {
   // Estado para almacenar los filtros seleccionados

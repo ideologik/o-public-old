@@ -10,6 +10,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import MDBox from "components/MDBox";
 import { fetchDealCategories, fetchDealSubCategories } from "services";
@@ -195,6 +196,11 @@ const ProductsFilter = ({ onFiltersChange }) => {
           sx={{ backgroundColor: features.colorPrimary }}
         />
         <CardContent style={{ paddingTop: "1.5%" }}>
+          {!isCategoriesLoaded && (
+            <Grid item xs={12} container justifyContent="center" alignItems="center">
+              <CircularProgress size={30} />
+            </Grid>
+          )}
           <Grid container spacing={2} alignItems="center">
             {/* Category Filter */}
             <Grid item md={12}>

@@ -115,11 +115,13 @@ const CardProducts = ({ filters }) => {
 
         // Configurar opciones de react-slick
         const sliderSettings = {
-          dots: !isSingleImage,
-          arrows: false,
+          dots: false,
+
           infinite: !isSingleImage,
           slidesToShow: 1,
           slidesToScroll: 1,
+          infinite: true,
+          adaptiveHeight: true,
           afterChange: (current) => handleImageChange(current, product.bes_id),
         };
 
@@ -152,8 +154,6 @@ const CardProducts = ({ filters }) => {
               >
                 <Slider
                   {...sliderSettings}
-                  adaptiveHeight={true}
-                  dots={false}
                   style={{
                     width: "100%",
                     height: "100%",
