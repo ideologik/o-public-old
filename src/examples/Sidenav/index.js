@@ -26,6 +26,7 @@ import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import Icon from "@mui/material/Icon";
+import IconButton from "@mui/material/IconButton";
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -69,6 +70,10 @@ function Sidenav({ color, brand, brandmini, brandName, routes, ...rest }) {
   }
 
   const closeSidenav = () => setMiniSidenav(dispatch, true);
+  const handleMiniSidenav = () => {
+    console.log("miniSidenav", miniSidenav);
+    setMiniSidenav(dispatch, !miniSidenav);
+  };
 
   useEffect(() => {
     setOpenCollapse(collapseName);
@@ -266,9 +271,14 @@ function Sidenav({ color, brand, brandmini, brandName, routes, ...rest }) {
             <Icon sx={{ fontWeight: "bold" }}>close</Icon>
           </MDTypography>
         </MDBox>
-        <MDBox component={NavLink} to="/" display="flex" alignItems="center">
+        <MDBox display="flex" alignItems="center">
           {brandmini && miniSidenav && (
-            <MDBox component="img" src={brandmini} alt="Brand" width="2rem" />
+            <>
+              <MDBox component="img" src={brandmini} alt="Brand" width="2rem" />
+              <IconButton onClick={handleMiniSidenav} size="small" disableRipple>
+                <Icon fontSize="medium">{!miniSidenav ? "menu_open" : "menu"}</Icon>
+              </IconButton>
+            </>
           )}
           <MDBox
             width={!brandName && "100%"}
@@ -278,6 +288,9 @@ function Sidenav({ color, brand, brandmini, brandName, routes, ...rest }) {
               {!brandName && <MDBox component="img" src={brand} alt="Brand" width="9rem" />}
             </MDTypography>
           </MDBox>
+          <IconButton onClick={handleMiniSidenav} size="small" disableRipple>
+            <Icon fontSize="medium">{!miniSidenav ? "menu_open" : "menu"}</Icon>
+          </IconButton>
         </MDBox>
       </MDBox>
       <Divider
