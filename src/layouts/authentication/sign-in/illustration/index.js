@@ -16,7 +16,7 @@ Coded by www.creative-tim.com
 import { useEffect, useState } from "react";
 
 // react-router-dom components
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 // @mui material components
 import Switch from "@mui/material/Switch";
@@ -52,6 +52,19 @@ function Illustration() {
   const navigate = useNavigate();
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
+  const location = useLocation();
+  const [scode, setScode] = useState(null);
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const scodeParam = queryParams.get("scode");
+    if (scodeParam) {
+      setScode(scodeParam);
+    }
+    // Limpia el token de autorización y el nombre de usuario
+    localStorage.removeItem("AuthorizationToken");
+    localStorage.removeItem("userName");
+  }, [location]);
+
   const handleLogin = () => {
     const options = {
       method: "GET",
@@ -66,6 +79,10 @@ function Illustration() {
       // base64 encoded password
       password: btoa(password),
     };
+    if (scode) {
+      options.params.scode = scode;
+    }
+    console.log("scode", scode);
 
     client
       .request(options)
