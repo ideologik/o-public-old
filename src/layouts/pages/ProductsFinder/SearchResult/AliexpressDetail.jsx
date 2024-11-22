@@ -71,6 +71,7 @@ const AliexpressDetail = () => {
   const [selectedDescription, setSelectedDescription] = useState(null); // selección única de descripción
   const [editingTitleIndex, setEditingTitleIndex] = useState(null); // índice del título en edición
   const [editingDescriptionIndex, setEditingDescriptionIndex] = useState(null); // índice de descripción en edición
+  console.log("detalles de producto seleccionado", aliexpressSelectedProduct);
 
   const fetchAdditionalInfo = async () => {
     setLoading(true);
@@ -310,7 +311,10 @@ const AliexpressDetail = () => {
                 >
                   <MDBox
                     component="img"
-                    src={aliexpressSelectedProduct.product_main_image_url || "/placeholder.jpg"}
+                    src={
+                      aliexpressSelectedProduct.product_main_image_url ||
+                      "/assets/imgs/default-product-image.png"
+                    }
                     alt={aliexpressSelectedProduct.product_title}
                     sx={{
                       width: "100%",

@@ -95,7 +95,7 @@ const CardProducts = ({ filters }) => {
   };
 
   const getImagesArray = (imageURLs) => {
-    if (!imageURLs) return ["/placeholder.jpg"];
+    if (!imageURLs) return ["/assets/imgs/default-product-image.png"];
     return imageURLs.split(",").map((url) => url.trim());
   };
 

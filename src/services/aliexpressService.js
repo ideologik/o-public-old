@@ -82,3 +82,15 @@ export const aliExpressProductEnhancer = async (product_id) => {
     throw new Error("Error fetching products");
   }
 };
+
+export const fetchAliExpressProductByID = async (product_id) => {
+  try {
+    const url = `ProductFinder/AliExpressGetProductByID?product_id=${product_id}`;
+    const response = await client.get(url);
+
+    return response;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw new Error("Error fetching products");
+  }
+};

@@ -13,6 +13,7 @@ const CardShopifyProducts = () => {
     setLoading(true);
     try {
       const response = await shopifyGetProducts();
+      console.log("respyesta de shopify", response);
       setProducts(response.data.products.edges);
       toast.success("Data fetched successfully.", {
         position: "bottom-right",
@@ -48,7 +49,10 @@ const CardShopifyProducts = () => {
           <Card>
             <Box
               component="img"
-              src={product.featuredMedia.preview.image.url}
+              src={
+                product.featuredMedia?.preview?.image.url ||
+                "/assets/imgs/default-product-image.png"
+              }
               alt={product.title}
               sx={{ width: "100%", height: "200px", objectFit: "contain" }}
             />

@@ -63,6 +63,7 @@ import ShopifyProducts from "layouts/pages/ShopifyProducts/ShopifyProducts";
 import SearchResults from "layouts/pages/ProductsFinder/SearchResult/SearchResult";
 import AliexpressConfig from "layouts/pages/settings/AliexpressConfig";
 import AliexpressDetail from "layouts/pages/ProductsFinder/SearchResult/AliexpressDetail";
+import ProductCardWithGallery from "layouts/pages/ProductsFinder/SearchResult/ProductCardWithGallery";
 
 // Images
 // import profilePicture from "assets/images/team-3.jpg";
@@ -134,8 +135,27 @@ const routes = [
     name: "Search Results",
     key: "search-results",
     route: "/product-finder/aliexpress-details",
-    component: <AliexpressDetail />,
+    component: <ProductCardWithGallery />,
   },
+  {
+    type: "collapse",
+    name: "ProductCardWithGallery",
+    key: "ProductCardWithGallery",
+    icon: <Icon>travel_explore</Icon>,
+    route: "/ProductCardWithGallery",
+    component: <ProductCardWithGallery />,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "AliexpressDetail",
+    key: "AliexpressDetail",
+    icon: <Icon>travel_explore</Icon>,
+    route: "/AliexpressDetail",
+    component: <AliexpressDetail />,
+    noCollapse: true,
+  },
+
   {
     type: "collapse",
     name: "My Products",
