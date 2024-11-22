@@ -83,7 +83,7 @@ export const aliExpressProductEnhancer = async (product_id) => {
   }
 };
 
-export const fetchAliExpressProductByID = async (product_id) => {
+export const fetchAliExpressGetProductByID = async (product_id) => {
   try {
     const url = `ProductFinder/AliExpressGetProductByID?product_id=${product_id}`;
     const response = await client.get(url);
