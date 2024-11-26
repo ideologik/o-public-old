@@ -230,11 +230,12 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   <InputLabel>By subcategory</InputLabel>
                   <Select
                     label="By subcategory"
-                    value={selectedCategoryState.subCategoryId || ""}
+                    value={selectedCategoryState.subCategoryId || "all"}
                     onChange={(e) => handleCategoryChange("subCategory", e.target.value)}
                     autoWidth
                     sx={{ height: "56px" }}
                   >
+                    <MenuItem value="all">All</MenuItem>
                     {subCategories.map((subCategory) => (
                       <MenuItem key={subCategory.categoryId} value={subCategory.categoryId}>
                         {subCategory.category}

@@ -44,10 +44,10 @@ function Illustration() {
   const [rememberMe, setRememberMe] = useState(false);
   const [errorSB, setErrorSB] = useState(false);
   const closeErrorSB = () => setErrorSB(false);
-  const [email, setEmail] = useState("kiamso@gmail.com");
-  const [password, setPassword] = useState("CatrielYPaquito");
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
+  //const [email, setEmail] = useState("kiamso@gmail.com");
+  //const [password, setPassword] = useState("CatrielYPaquito");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [passVisible, setPassVisible] = useState(false);
   const navigate = useNavigate();
   const handleSetRememberMe = () => setRememberMe(!rememberMe);

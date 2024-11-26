@@ -47,12 +47,15 @@ const CardProducts = ({ filters }) => {
 
     if (showLoading) setLoading(true);
     try {
+      console.log("filters", filters);
+      if (filters.AmazonSubCategoryId === "all") filters.AmazonSubCategoryId = null;
       const response = await productsFinder({
         ...filters,
         page: currentPage,
         total_rows: 10,
       });
-      setProducts((prev) => [...prev, ...response.data]);
+      const data = response.data ? response.data : [];
+      setProducts((prev) => [...prev, ...data]);
     } catch (error) {
       console.error("Error fetching products:", error);
       setAlertProps({
@@ -332,6 +335,7 @@ const CardProducts = ({ filters }) => {
 CardProducts.propTypes = {
   filters: PropTypes.shape({
     AmazonCategoryId: PropTypes.string,
+    AmazonSubCategoryId: PropTypes.string,
   }),
 };
 
