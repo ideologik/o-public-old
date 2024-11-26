@@ -128,6 +128,7 @@ const ProductCardWithGallery = () => {
       pro_price: suggestedPrice,
       pro_date: new Date().toISOString(),
       pro_status: 1, // Estado 'draft'
+      pro_ali_id: aliexpressSelectedProduct.product_id,
     };
 
     // Creación de la promesa para guardar el producto
