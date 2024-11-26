@@ -13,8 +13,7 @@ import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import { useAtom } from "jotai";
 import { aliexpressSelectedProductAtom, bsSelectedProductAtom } from "stores/productAtom";
-import { createProduct } from "services/productService"; // Importamos createProduct
-import { fetchAliExpressGetProductByID } from "services"; // Mantenemos esta importación para obtener la información adicional
+import { aliExpressProductEnhancer, fetchAliExpressGetProductByID } from "services";
 import { toast, ToastContainer } from "react-toastify";
 import { Bar, Line } from "react-chartjs-2";
 import Slider from "@material-ui/core/Slider";
@@ -31,8 +30,13 @@ import {
   Legend,
 } from "chart.js";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-// Registrar módulos de chart.js
+import PublishProductDialog from "./PublishProductDialog"; // Import the new component
+
+const getTrendIcon = (current, average) => {
+  if (current > average) return <ArrowUpward style={{ color: "green" }} />;
+  if (current < average) return <ArrowDownward style={{ color: "red" }} />;
+  return <HorizontalRule style={{ color: "gray" }} />;
+};
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -44,69 +48,41 @@ ChartJS.register(
   Legend
 );
 
-const getTrendIcon = (current, average) => {
-  if (current > average) return <ArrowUpward style={{ color: "green" }} />;
-  if (current < average) return <ArrowDownward style={{ color: "red" }} />;
-  return <HorizontalRule style={{ color: "gray" }} />;
-};
-
 const ProductCardWithGallery = () => {
-  const navigate = useNavigate();
   const [aliexpressSelectedProduct] = useAtom(aliexpressSelectedProductAtom);
   const [selectedProduct] = useAtom(bsSelectedProductAtom);
   const [mainMedia, setMainMedia] = useState(aliexpressSelectedProduct.product_main_image_url);
-  const [mainMediaType, setMainMediaType] = useState("image"); // Controlar si es imagen o video
+  const [mainMediaType, setMainMediaType] = useState("image"); // Control whether it's an image or video
   const [suggestedPrice, setSuggestedPrice] = useState(selectedProduct.bes_price || 0);
   const [additionalInfo, setAdditionalInfo] = useState(null);
   const [productMedia, setProductMedia] = useState([]);
+  const [openPopup, setOpenPopup] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Obtener información adicional del producto
+    // Fetch additional product information
     const fetchAdditionalProductInfo = async () => {
       try {
         const response = await fetchAliExpressGetProductByID(aliexpressSelectedProduct.product_id);
         const result = response?.aliexpress_ds_product_get_response?.result;
 
         if (result) {
-          // Extraer URLs de imágenes
+          // Extract image URLs
           const imageURLs = result.ae_multimedia_info_dto?.image_urls
             ? result.ae_multimedia_info_dto.image_urls.split(";")
             : [];
 
-          // Extraer título y descripción
+          // Extract title and description
           const productTitle = result.ae_item_base_info_dto?.subject || "";
           const productDescription = result.ae_item_base_info_dto?.detail || "";
 
-          // Establecer additionalInfo con las propiedades necesarias
+          // Set additionalInfo with the necessary properties
           setAdditionalInfo({
             ...result,
             productTitles: [productTitle],
             productDescriptions: [productDescription],
             imageURLs,
           });
-
-          // Configurar la galería de medios
-          let productVideos = result.ae_multimedia_info_dto?.ae_video_dtos?.ae_video_d_t_o;
-
-          // Asegurar que productVideos es un array
-          if (productVideos) {
-            if (!Array.isArray(productVideos)) {
-              productVideos = [productVideos];
-            }
-          } else {
-            productVideos = [];
-          }
-
-          // Combinar videos e imágenes en un solo array de medios
-          setProductMedia([
-            ...productVideos.map((video) => ({
-              type: "video",
-              url: video.media_url,
-              poster: video.poster_url,
-            })),
-            ...imageURLs.map((image) => ({ type: "image", url: image })),
-          ]);
         }
       } catch (error) {
         console.error("Error fetching additional product info:", error);
@@ -116,34 +92,53 @@ const ProductCardWithGallery = () => {
     fetchAdditionalProductInfo();
   }, [aliexpressSelectedProduct.product_id]);
 
-  const handleSaveProduct = async () => {
+  useEffect(() => {
+    if (additionalInfo) {
+      // Get videos
+      let productVideos = additionalInfo?.ae_multimedia_info_dto?.ae_video_dtos?.ae_video_d_t_o;
+
+      // Ensure productVideos is an array
+      if (productVideos) {
+        if (!Array.isArray(productVideos)) {
+          productVideos = [productVideos];
+        }
+      } else {
+        productVideos = [];
+      }
+
+      // Get images
+      let productImages = additionalInfo?.imageURLs;
+      if (!productImages) {
+        productImages = [];
+      }
+
+      // Combine videos and images into one media array
+      setProductMedia([
+        ...productVideos.map((video) => ({
+          type: "video",
+          url: video.media_url,
+          poster: video.poster_url,
+        })),
+        ...productImages.map((image) => ({ type: "image", url: image })),
+      ]);
+    }
+  }, [additionalInfo]);
+
+  const fetchAdditionalInfo = async () => {
     setLoading(true);
 
-    const productData = {
-      pro_bes_asin: selectedProduct.bes_asin || "",
-      pro_name: aliexpressSelectedProduct.product_title || "",
-      pro_description: additionalInfo?.productDescriptions?.[0] || "",
-      pro_imageURLs: additionalInfo?.imageURLs?.join(",") || "",
-      pro_url: aliexpressSelectedProduct.product_detail_url || "",
-      pro_price: suggestedPrice,
-      pro_date: new Date().toISOString(),
-      pro_status: 1, // Estado 'draft'
-    };
+    const fetchPromise = aliExpressProductEnhancer(aliexpressSelectedProduct.product_id);
 
-    // Creación de la promesa para guardar el producto
-    const savePromise = createProduct(productData);
-
-    // Usar toast.promise para manejar el estado del toast
     toast.promise(
-      savePromise,
+      fetchPromise,
       {
-        pending: "Guardando producto...",
-        success: "Producto guardado exitosamente 👌",
-        error: "Error al guardar el producto 🤯",
+        pending: "Fetching additional product information...",
+        success: "Product information loaded successfully 👌",
+        error: "Error fetching product information 🤯",
       },
       {
         position: "top-center",
-        autoClose: 3000, // Cierra automáticamente el toast después de 3 segundos
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -153,14 +148,43 @@ const ProductCardWithGallery = () => {
     );
 
     try {
-      const response = await savePromise;
-      console.log("Producto guardado:", response);
+      const data = await fetchPromise;
+
+      // Ensure productTitles and productDescriptions are arrays
+      const productTitles = data.productTitles || [];
+      const productDescriptions = data.productDescriptions || [];
+
+      // Use default title and description if not present
+      if (productTitles.length === 0) {
+        const defaultTitle = aliexpressSelectedProduct.product_title || "";
+        productTitles.push(defaultTitle);
+      }
+
+      if (productDescriptions.length === 0) {
+        const defaultDescription = additionalInfo?.ae_item_base_info_dto?.detail || "";
+        productDescriptions.push(defaultDescription);
+      }
+
+      // Update additionalInfo with new data
+      setAdditionalInfo({
+        ...additionalInfo,
+        ...data,
+        productTitles,
+        productDescriptions,
+      });
+
+      if (data) {
+        setOpenPopup(true);
+      }
     } catch (error) {
-      console.error("Error al guardar el producto:", error);
+      console.error("Error fetching additional information:", error);
     }
 
     setLoading(false);
-    navigate("/my-products");
+  };
+
+  const handleClosePopup = () => {
+    setOpenPopup(false);
   };
 
   const calculatePotentialProfit = () => {
@@ -350,7 +374,7 @@ const ProductCardWithGallery = () => {
                 )}
               </MDBox>
 
-              {/* Contenido del Producto */}
+              {/* Product Content */}
               <CardContent sx={{ padding: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {aliexpressSelectedProduct.product_title}
@@ -359,7 +383,7 @@ const ProductCardWithGallery = () => {
                   Category: {aliexpressSelectedProduct.second_level_category_name || "N/A"}
                 </Typography>
 
-                {/* Precio Actual y Descuento */}
+                {/* Current Price and Discount */}
                 <Typography
                   variant="h5"
                   color="primary"
@@ -385,7 +409,7 @@ const ProductCardWithGallery = () => {
                   Potential Profit (monthly): ${calculatePotentialProfit()} USD
                 </Typography>
                 <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
-                  Rango de Ventas: {selectedProduct.bes_salesrank || "N/A"}{" "}
+                  Sales Rank: {selectedProduct.bes_salesrank || "N/A"}{" "}
                   {getTrendIcon(
                     selectedProduct.bes_salesrank,
                     selectedProduct.bes_salesrank90DaysAverage
@@ -408,7 +432,7 @@ const ProductCardWithGallery = () => {
                 <Grid item xs={12} md={8}>
                   <Paper elevation={4} sx={{ padding: 4, borderRadius: 2 }}>
                     <Grid container spacing={4}>
-                      {/* Tendencias de Precio y Competencia */}
+                      {/* Price Trends */}
                       <Grid item xs={12}>
                         <Typography variant="h6" gutterBottom>
                           Price & Competition Trends
@@ -435,6 +459,7 @@ const ProductCardWithGallery = () => {
               gap: 2,
             }}
           >
+            {/* Buttons */}
             {loading ? (
               <MDBox display="flex" justifyContent="center">
                 <CircularProgress />
@@ -443,7 +468,7 @@ const ProductCardWithGallery = () => {
               <MDButton
                 variant="contained"
                 color="primary"
-                onClick={handleSaveProduct}
+                onClick={() => fetchAdditionalInfo()}
                 disabled={false}
               >
                 Add to My Products
@@ -458,7 +483,7 @@ const ProductCardWithGallery = () => {
                   color: suggestedPrice > selectedProduct.bes_price ? "red" : "inherit",
                 }}
               >
-                Precio Sugerido: ${parseFloat(suggestedPrice).toFixed(2)} USD
+                Suggested Price: ${parseFloat(suggestedPrice).toFixed(2)} USD
               </Typography>
               <Slider
                 value={suggestedPrice}
@@ -483,7 +508,7 @@ const ProductCardWithGallery = () => {
               <Bar data={priceComparisonData} />
             </Grid>
 
-            {/* Margen de Beneficio */}
+            {/* Profit Margin */}
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
                 Profit Margin
@@ -493,6 +518,16 @@ const ProductCardWithGallery = () => {
           </Paper>
         </MDBox>
       </MDBox>
+
+      {/* Popup Dialog */}
+      <PublishProductDialog
+        open={openPopup}
+        onClose={handleClosePopup}
+        loading={loading}
+        setLoading={setLoading}
+        additionalInfo={additionalInfo}
+        suggestedPrice={suggestedPrice}
+      />
 
       <ToastContainer />
     </DashboardLayout>
