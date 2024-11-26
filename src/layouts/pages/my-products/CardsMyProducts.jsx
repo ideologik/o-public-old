@@ -13,16 +13,16 @@ const CardsMyProducts = () => {
     setLoading(true);
     try {
       const response = await fetchProducts();
-      const productsData = response.data; // Accedemos a la lista de productos
+      const productsData = response.data; // Access the product list
 
       setProducts(productsData);
-      toast.success("Productos cargados exitosamente.", {
+      toast.success("Products loaded successfully.", {
         position: "bottom-right",
         autoClose: 3000,
       });
     } catch (error) {
-      console.error("Error al obtener los productos:", error);
-      toast.error("Error al obtener los productos.", {
+      console.error("Error fetching products:", error);
+      toast.error("Error fetching products.", {
         position: "bottom-right",
         autoClose: 3000,
       });
@@ -48,7 +48,7 @@ const CardsMyProducts = () => {
               <Box
                 component="img"
                 src={
-                  // Tomamos la primera URL de las imágenes
+                  // Take the first URL from the image list
                   product.pro_imageURLs
                     ? product.pro_imageURLs.split(",")[0]
                     : "/assets/imgs/default-product-image.png"
@@ -65,7 +65,7 @@ const CardsMyProducts = () => {
                   </Typography>
                 </Tooltip>
                 <Typography variant="body2" color="textSecondary">
-                  Precio: ${product.pro_price}
+                  Price: ${product.pro_price}
                 </Typography>
                 <Box mt={2} display="flex" justifyContent="center" alignItems="center">
                   <MDButton
@@ -75,7 +75,7 @@ const CardsMyProducts = () => {
                     href={product.pro_url}
                     target="_blank"
                   >
-                    view in AliExpress
+                    View on AliExpress
                   </MDButton>
                 </Box>
               </CardContent>
@@ -84,7 +84,7 @@ const CardsMyProducts = () => {
         ))
       ) : (
         <Grid item xs={12} container justifyContent="center" alignItems="center">
-          <Typography variant="h6">There are no products available.</Typography>
+          <Typography variant="h6">No products available.</Typography>
         </Grid>
       )}
     </Grid>
