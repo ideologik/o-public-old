@@ -8,24 +8,27 @@ import "react-toastify/dist/ReactToastify.css";
 const CardsMyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // Pagination states
   const [page, setPage] = useState(0);
-  const observerRef = useRef(null);
+  const [hasMore, setHasMore] = useState(true); // Control para detener el paginado si no hay más productos
+  const observerRef = useRef();
 
   // Fetch products with pagination
-  const fetchProductsData = async (currentPage, showLoading = false) => {
-    if (showLoading) setLoading(true);
+  const fetchProductsData = async (currentPage) => {
+    if (loading || !hasMore) return; // Prevenir múltiples llamadas
+    setLoading(true);
+
     try {
       const response = await fetchProducts({ page: currentPage, total_rows: 10 });
-      console.log("products", response.data, page);
-      const productsData = response.data || [];
+      const newProducts = response.data || [];
 
-      setProducts(productsData);
-      if (currentPage === 0) {
-        toast.success("Products loaded successfully.", {
-          position: "bottom-right",
-          autoClose: 3000,
+      if (newProducts.length === 0) {
+        setHasMore(false); // Detener el paginado si no hay más productos
+      } else {
+        setProducts((prevProducts) => {
+          const uniqueProducts = newProducts.filter(
+            (product) => !prevProducts.some((p) => p.pro_id === product.pro_id) // Evitar duplicados
+          );
+          return [...prevProducts, ...uniqueProducts];
         });
       }
     } catch (error) {
@@ -35,14 +38,15 @@ const CardsMyProducts = () => {
         autoClose: 3000,
       });
     }
-    if (showLoading) setLoading(false);
+    setLoading(false);
   };
 
-  // Initial fetch and reset when needed
+  // Initial fetch
   useEffect(() => {
     setProducts([]);
     setPage(0);
-    fetchProductsData(0, true);
+    setHasMore(true); // Reiniciar la capacidad de paginado
+    fetchProductsData(0);
   }, []);
 
   // Fetch more products when page changes
@@ -56,13 +60,13 @@ const CardsMyProducts = () => {
       if (loading) return;
       if (observerRef.current) observerRef.current.disconnect();
       observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasMore) {
           setPage((prevPage) => prevPage + 1);
         }
       });
       if (node) observerRef.current.observe(node);
     },
-    [loading]
+    [loading, hasMore]
   );
 
   return (
@@ -86,7 +90,6 @@ const CardsMyProducts = () => {
             <Box
               component="img"
               src={
-                // Take the first URL from the image list
                 product.pro_imageURLs
                   ? product.pro_imageURLs.split(",")[0]
                   : "/assets/imgs/default-product-image.png"
