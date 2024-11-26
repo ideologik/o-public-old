@@ -43,10 +43,14 @@ const CardsMyProducts = () => {
 
   // Initial fetch
   useEffect(() => {
+    let isMounted = true;
     setProducts([]);
     setPage(0);
     setHasMore(true); // Reiniciar la capacidad de paginado
-    fetchProductsData(0);
+    if (isMounted) fetchProductsData(0);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Fetch more products when page changes
