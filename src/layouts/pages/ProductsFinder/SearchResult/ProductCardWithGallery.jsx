@@ -7,28 +7,14 @@ import {
   Paper,
   Divider,
   CircularProgress,
-  Checkbox,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItemButton,
-  ListItemText,
-  TextField,
 } from "@mui/material";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import { useAtom } from "jotai";
 import { aliexpressSelectedProductAtom, bsSelectedProductAtom } from "stores/productAtom";
-import {
-  aliExpressProductEnhancer,
-  shopifyCreateProduct,
-  fetchAliExpressGetProductByID,
-} from "services";
+import { aliExpressProductEnhancer, fetchAliExpressGetProductByID } from "services";
 import { toast, ToastContainer } from "react-toastify";
-import {} from "services/aliexpressService";
 import { Bar, Line } from "react-chartjs-2";
 import Slider from "@material-ui/core/Slider";
 import "react-toastify/dist/ReactToastify.css";
@@ -44,6 +30,7 @@ import {
   Legend,
 } from "chart.js";
 import { ArrowUpward, ArrowDownward, HorizontalRule } from "@mui/icons-material";
+import PublishProductDialog from "./PublishProductDialog"; // Import the new component
 
 const getTrendIcon = (current, average) => {
   if (current > average) return <ArrowUpward style={{ color: "green" }} />;
@@ -65,20 +52,15 @@ const ProductCardWithGallery = () => {
   const [aliexpressSelectedProduct] = useAtom(aliexpressSelectedProductAtom);
   const [selectedProduct] = useAtom(bsSelectedProductAtom);
   const [mainMedia, setMainMedia] = useState(aliexpressSelectedProduct.product_main_image_url);
-  const [mainMediaType, setMainMediaType] = useState("image"); // Para controlar si es imagen o video
+  const [mainMediaType, setMainMediaType] = useState("image"); // Control whether it's an image or video
   const [suggestedPrice, setSuggestedPrice] = useState(selectedProduct.bes_price || 0);
   const [additionalInfo, setAdditionalInfo] = useState(null);
   const [productMedia, setProductMedia] = useState([]);
   const [openPopup, setOpenPopup] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedImages, setSelectedImages] = useState([]); // selección múltiple de imágenes
-  const [selectedTitle, setSelectedTitle] = useState(null); // selección única de título
-  const [selectedDescription, setSelectedDescription] = useState(null); // selección única de descripción
-  const [editingTitleIndex, setEditingTitleIndex] = useState(null); // índice del título en edición
-  const [editingDescriptionIndex, setEditingDescriptionIndex] = useState(null); // índice de descripción en edición
 
   useEffect(() => {
-    // Llamada para obtener la información adicional del producto
+    // Fetch additional product information
     const fetchAdditionalProductInfo = async () => {
       try {
         const response = await fetchAliExpressGetProductByID(aliexpressSelectedProduct.product_id);
@@ -112,10 +94,10 @@ const ProductCardWithGallery = () => {
 
   useEffect(() => {
     if (additionalInfo) {
-      // Obtener videos
+      // Get videos
       let productVideos = additionalInfo?.ae_multimedia_info_dto?.ae_video_dtos?.ae_video_d_t_o;
 
-      // Si productVideos es un objeto, lo convertimos en un array
+      // Ensure productVideos is an array
       if (productVideos) {
         if (!Array.isArray(productVideos)) {
           productVideos = [productVideos];
@@ -124,13 +106,13 @@ const ProductCardWithGallery = () => {
         productVideos = [];
       }
 
-      // Obtener imágenes
+      // Get images
       let productImages = additionalInfo?.imageURLs;
       if (!productImages) {
         productImages = [];
       }
 
-      // Combinar videos e imágenes en un solo arreglo de medios
+      // Combine videos and images into one media array
       setProductMedia([
         ...productVideos.map((video) => ({
           type: "video",
@@ -172,7 +154,7 @@ const ProductCardWithGallery = () => {
       const productTitles = data.productTitles || [];
       const productDescriptions = data.productDescriptions || [];
 
-      // If data doesn't contain titles and descriptions, use default ones
+      // Use default title and description if not present
       if (productTitles.length === 0) {
         const defaultTitle = aliexpressSelectedProduct.product_title || "";
         productTitles.push(defaultTitle);
@@ -192,117 +174,18 @@ const ProductCardWithGallery = () => {
       });
 
       if (data) {
-        // Seleccionar todas las imágenes
-        setSelectedImages([...Array(additionalInfo.imageURLs.length).keys()]);
-        setSelectedTitle(0); // Default to first title
-        setSelectedDescription(0); // Default to first description
         setOpenPopup(true);
       }
     } catch (error) {
-      console.error("Error al obtener la información adicional:", error);
+      console.error("Error fetching additional information:", error);
     }
 
     setLoading(false);
   };
 
-  const handleImageToggle = (index) => {
-    setSelectedImages((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
-  };
-
-  const handleTitleSelect = (index) => {
-    setSelectedTitle(index);
-  };
-
-  const handleDescriptionSelect = (index) => {
-    setSelectedDescription(index);
-  };
-
-  const handleTitleDoubleClick = (index) => {
-    setEditingTitleIndex(index);
-  };
-
-  const handleDescriptionDoubleClick = (index) => {
-    setEditingDescriptionIndex(index);
-  };
-
-  const handleTitleChange = (event, index) => {
-    const newTitles = [...additionalInfo.productTitles];
-    newTitles[index] = event.target.value;
-    setAdditionalInfo((prev) => ({
-      ...prev,
-      productTitles: newTitles,
-    }));
-  };
-
-  const handleDescriptionChange = (event, index) => {
-    const newDescriptions = [...additionalInfo.productDescriptions];
-    newDescriptions[index] = event.target.value;
-    setAdditionalInfo((prev) => ({
-      ...prev,
-      productDescriptions: newDescriptions,
-    }));
-  };
-
-  const handleEditComplete = () => {
-    setEditingTitleIndex(null);
-    setEditingDescriptionIndex(null);
-  };
-
   const handleClosePopup = () => {
     setOpenPopup(false);
   };
-
-  const handlePublishProduct = async () => {
-    if (selectedImages.length > 0 && selectedTitle !== null && selectedDescription !== null) {
-      setLoading(true);
-      const selectedTitleText = additionalInfo.productTitles[selectedTitle];
-      const selectedDescriptionText = additionalInfo.productDescriptions[selectedDescription];
-      const selectedImagesUrls = selectedImages.map((index) => additionalInfo.imageURLs[index]);
-      setOpenPopup(false);
-
-      // Creación de la promesa para la publicación del producto
-      const publishPromise = shopifyCreateProduct({
-        title: selectedTitleText,
-        descriptionHTML: selectedDescriptionText,
-        price: suggestedPrice,
-        imageURLs: selectedImagesUrls.join(","),
-      });
-
-      // Usar toast.promise para manejar el estado del toast
-      toast.promise(
-        publishPromise,
-        {
-          pending: "Publishing product...",
-          success: "Product published successfully 👌",
-          error: "Error publishing product 🤯",
-        },
-        {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-        }
-      );
-
-      try {
-        const response = await publishPromise;
-        console.log("Product created:", response);
-      } catch (error) {
-        console.error("Error publishing product:", error);
-      }
-
-      setLoading(false);
-    }
-  };
-
-  // Deshabilitar el botón si no hay al menos una imagen, un título y una descripción seleccionada
-  const isPublishDisabled =
-    selectedImages.length === 0 || selectedTitle === null || selectedDescription === null;
 
   const calculatePotentialProfit = () => {
     const profitPerUnit = suggestedPrice - parseFloat(aliexpressSelectedProduct.target_sale_price);
@@ -327,6 +210,7 @@ const ProductCardWithGallery = () => {
       },
     ],
   };
+
   // Data for the bar chart for price comparison
   const priceComparisonData = {
     labels: ["Amazon", "AliExpress", "Suggested Price"],
@@ -343,7 +227,7 @@ const ProductCardWithGallery = () => {
     ],
   };
 
-  // Data for the area/bar chart for profit margin
+  // Data for the bar chart for profit margin
   const profitMarginData = {
     labels: ["Profit Margin"],
     datasets: [
@@ -375,9 +259,9 @@ const ProductCardWithGallery = () => {
           padding: 4,
         }}
       >
-        {/* Columna Izquierda - Información del Producto */}
+        {/* Left Column - Product Information */}
         <Paper elevation={4} sx={{ flex: 3, borderRadius: 2, display: "flex", gap: 3 }}>
-          {/* Galería de Imágenes en Miniatura */}
+          {/* Thumbnail Image Gallery */}
           <MDBox
             sx={{
               display: "flex",
@@ -417,7 +301,7 @@ const ProductCardWithGallery = () => {
             ))}
           </MDBox>
 
-          {/* Card Principal del Producto */}
+          {/* Main Product Card */}
           <MDBox sx={{ flex: 1 }}>
             <Card
               sx={{
@@ -427,7 +311,7 @@ const ProductCardWithGallery = () => {
                 flexDirection: "column",
               }}
             >
-              {/* Media Principal (Imagen o Video) */}
+              {/* Main Media (Image or Video) */}
               <MDBox
                 sx={{
                   width: "100%",
@@ -435,7 +319,7 @@ const ProductCardWithGallery = () => {
                   overflow: "hidden",
                 }}
               >
-                {/* Etiqueta de descuento o evento */}
+                {/* Discount or Event Label */}
                 {aliexpressSelectedProduct.discount && (
                   <MDBox
                     sx={{
@@ -490,7 +374,7 @@ const ProductCardWithGallery = () => {
                 )}
               </MDBox>
 
-              {/* Contenido del Producto */}
+              {/* Product Content */}
               <CardContent sx={{ padding: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {aliexpressSelectedProduct.product_title}
@@ -499,7 +383,7 @@ const ProductCardWithGallery = () => {
                   Category: {aliexpressSelectedProduct.second_level_category_name || "N/A"}
                 </Typography>
 
-                {/* Precio Actual y Descuento */}
+                {/* Current Price and Discount */}
                 <Typography
                   variant="h5"
                   color="primary"
@@ -563,7 +447,7 @@ const ProductCardWithGallery = () => {
           </MDBox>
         </Paper>
 
-        {/* Columna Derecha - Botones y Opciones */}
+        {/* Right Column - Buttons and Options */}
         <MDBox sx={{ flex: 1 }}>
           <Paper
             elevation={4}
@@ -575,7 +459,7 @@ const ProductCardWithGallery = () => {
               gap: 2,
             }}
           >
-            {/* Botones */}
+            {/* Buttons */}
             {loading ? (
               <MDBox display="flex" justifyContent="center">
                 <CircularProgress />
@@ -636,122 +520,15 @@ const ProductCardWithGallery = () => {
       </MDBox>
 
       {/* Popup Dialog */}
-      <Dialog open={openPopup} onClose={handleClosePopup} fullWidth maxWidth="md">
-        <DialogTitle>Additional Product Information</DialogTitle>
-        <DialogContent>
-          {loading ? (
-            <CircularProgress />
-          ) : additionalInfo ? (
-            <>
-              <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
-                Select Images:
-              </Typography>
-              <Grid container spacing={1}>
-                {additionalInfo.imageURLs.map((url, index) => (
-                  <Grid item xs={2} key={index}>
-                    <Card
-                      sx={{
-                        border: selectedImages.includes(index)
-                          ? "2px solid blue"
-                          : "1px solid gray",
-                        cursor: "pointer",
-                        overflow: "hidden",
-                        aspectRatio: "1 / 1",
-                        transition: "transform 0.2s ease-in-out",
-                        "&:hover": {
-                          transform: "scale(1.05)",
-                        },
-                      }}
-                      onClick={() => handleImageToggle(index)}
-                    >
-                      <MDBox
-                        component="img"
-                        src={url}
-                        alt={`Product ${index}`}
-                        sx={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "contain",
-                        }}
-                      />
-                      <Checkbox
-                        checked={selectedImages.includes(index)}
-                        sx={{ position: "absolute", top: 0, right: 0 }}
-                      />
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+      <PublishProductDialog
+        open={openPopup}
+        onClose={handleClosePopup}
+        loading={loading}
+        setLoading={setLoading}
+        additionalInfo={additionalInfo}
+        suggestedPrice={suggestedPrice}
+      />
 
-              <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
-                Select a Title:
-              </Typography>
-              <List>
-                {additionalInfo.productTitles.map((title, index) => (
-                  <ListItemButton
-                    key={index}
-                    selected={selectedTitle === index}
-                    onClick={() => handleTitleSelect(index)}
-                    onDoubleClick={() => handleTitleDoubleClick(index)}
-                  >
-                    {editingTitleIndex === index ? (
-                      <TextField
-                        value={title}
-                        onChange={(e) => handleTitleChange(e, index)}
-                        onBlur={handleEditComplete}
-                        autoFocus
-                        fullWidth
-                        size="small"
-                      />
-                    ) : (
-                      <ListItemText primary={title} />
-                    )}
-                  </ListItemButton>
-                ))}
-              </List>
-
-              <Typography variant="subtitle1" sx={{ marginTop: 2 }}>
-                Select a Description:
-              </Typography>
-              <List>
-                {additionalInfo.productDescriptions.map((desc, index) => (
-                  <ListItemButton
-                    key={index}
-                    selected={selectedDescription === index}
-                    onClick={() => handleDescriptionSelect(index)}
-                    onDoubleClick={() => handleDescriptionDoubleClick(index)}
-                  >
-                    {editingDescriptionIndex === index ? (
-                      <TextField
-                        value={desc}
-                        onChange={(e) => handleDescriptionChange(e, index)}
-                        onBlur={handleEditComplete}
-                        autoFocus
-                        fullWidth
-                        size="small"
-                      />
-                    ) : (
-                      <ListItemText primary={desc} />
-                    )}
-                  </ListItemButton>
-                ))}
-              </List>
-            </>
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              No additional information available. Press Enhance Product to load.
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <MDButton onClick={handleClosePopup} color="secondary">
-            Close
-          </MDButton>
-          <MDButton color="primary" disabled={isPublishDisabled} onClick={handlePublishProduct}>
-            Publish Product
-          </MDButton>
-        </DialogActions>
-      </Dialog>
       <ToastContainer />
     </DashboardLayout>
   );

@@ -158,9 +158,9 @@ const routes = [
 
   {
     type: "collapse",
-    name: "My Products",
+    name: "Shopify Products",
     key: "ShopifyProducts",
-    icon: <Icon>shopping_cart</Icon>,
+    icon: <Icon>store_front</Icon>,
     route: "/shopify-products",
     component: <ShopifyProducts />,
     noCollapse: true,

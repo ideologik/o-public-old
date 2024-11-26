@@ -229,7 +229,7 @@ const SearchResults = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Analyze
+                          Analyze Product
                         </MDButton>
                       </Box>
                     </CardContent>

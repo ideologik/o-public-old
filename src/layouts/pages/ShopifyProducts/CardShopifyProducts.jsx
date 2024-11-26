@@ -13,8 +13,15 @@ const CardShopifyProducts = () => {
     setLoading(true);
     try {
       const response = await shopifyGetProducts();
-      console.log("respyesta de shopify", response);
-      setProducts(response.data.products.edges);
+      console.log("respyesta de shopify", response.data.products.edges);
+
+      const products = response.data.products.edges.sort((a, b) => {
+        // Extraemos el número del ID para compararlo como número
+        const idA = parseInt(a.node.id.match(/\d+$/)[0], 10);
+        const idB = parseInt(b.node.id.match(/\d+$/)[0], 10);
+        return idB - idA; // Orden descendente
+      });
+      setProducts(products);
       toast.success("Data fetched successfully.", {
         position: "bottom-right",
         autoClose: 3000,
