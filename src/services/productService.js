@@ -1,8 +1,8 @@
 import client from "services/ApiClient";
 
-export const fetchProducts = async () => {
+export const fetchProducts = async (filters) => {
   try {
-    const response = await client.get("products?page=0&total_rows=1000");
+    const response = await client.get("products", { params: filters });
     return response;
   } catch (error) {
     console.error("Error fetching products:", error);
