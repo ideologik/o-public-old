@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Card,
-  CardHeader,
   CardContent,
   Typography,
   Grid,
@@ -10,14 +9,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  TextField,
   CircularProgress,
 } from "@mui/material";
 import MDBox from "components/MDBox";
+import MDButton from "components/MDButton";
+import Slider from "@material-ui/core/Slider";
 import { fetchDealCategories, fetchDealSubCategories } from "services";
-
 import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
-import { useFeatureFlags } from "context/FeatureFlags";
 
 // Función recursiva para eliminar categorías duplicadas
 function removeDuplicateCategories(categories, seenIds = new Set()) {
@@ -37,19 +37,19 @@ function removeDuplicateCategories(categories, seenIds = new Set()) {
 }
 
 const ProductsFilter = ({ onFiltersChange }) => {
-  const { features } = useFeatureFlags();
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [thirdLevelCategories, setThirdLevelCategories] = useState([]);
 
   const [selectedCategoryState, setSelectedCategoryState] = useAtom(bsSelectedCategoryAtom);
+  const [priceRange, setPriceRange] = useState([50, 150]);
+  const [searchText, setSearchText] = useState("");
 
   const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
 
   // Fetch and clean categories on mount
   useEffect(() => {
     const fetchDealsGroups = async () => {
-      console.log("entro en fetchDealsGroups");
       setIsCategoriesLoaded(false);
       const productGroups = await fetchDealCategories();
       const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
@@ -64,6 +64,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
       const cleanedCategories = removeDuplicateCategories(sortedCategories);
       setCategories(cleanedCategories);
       setIsCategoriesLoaded(true);
+
       console.log("lo pone  a true a setIsCategoriesLoaded");
 
       // Establecer categoría predeterminada y subcategorías si no hay categoría seleccionada
@@ -177,43 +178,68 @@ const ProductsFilter = ({ onFiltersChange }) => {
 
   const handleFilterChange = () => {
     onFiltersChange({
+      searchText,
       AmazonCategoryId: selectedCategoryState.categoryId,
       AmazonSubCategoryId: selectedCategoryState.subCategoryId,
       AmazonThirdCategoryId: selectedCategoryState.thirdLevelCategoryId,
+      priceFrom: priceRange[0],
+      priceTo: priceRange[1],
+
       isCategoriesLoaded,
+    });
+  };
+
+  const handlePriceChange = (event, newValue) => {
+    setPriceRange(newValue);
+  };
+  const handleSearchTextChange = (event) => {
+    setSearchText(event.target.value);
+  };
+
+  const handleSearch = () => {
+    onFiltersChange({
+      searchText,
+      AmazonCategoryId: selectedCategoryState.categoryId,
+      AmazonSubCategoryId: selectedCategoryState.subCategoryId,
+      priceFrom: priceRange[0],
+      priceTo: priceRange[1],
     });
   };
 
   return (
     <MDBox sx={{ padding: 2 }}>
       <Card>
-        <CardHeader
-          title={
-            <Typography variant="h6" color="#FFFFFF">
-              Product Filter
-            </Typography>
-          }
-          sx={{ backgroundColor: features.colorPrimary }}
-        />
-        <CardContent style={{ paddingTop: "1.5%" }}>
-          {!isCategoriesLoaded && (
-            <Grid item xs={12} container justifyContent="center" alignItems="center">
+        <CardContent>
+          {!isCategoriesLoaded ? (
+            <MDBox display="flex" justifyContent="center" alignItems="center" height="46px">
               <CircularProgress size={30} />
-            </Grid>
-          )}
-          <Grid container spacing={2} alignItems="center">
-            {/* Category Filter */}
-            <Grid item md={12}>
-              {categories.length > 0 && (
-                <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
-                  <InputLabel>By category</InputLabel>
+            </MDBox>
+          ) : (
+            <Grid container spacing={2} alignItems="center">
+              {/* Search Field */}
+              <Grid item xs={12} md={2}>
+                <TextField
+                  fullWidth
+                  label="Search"
+                  variant="outlined"
+                  sx={{ height: "46px" }}
+                  InputProps={{ style: { height: "46px" } }}
+                  value={searchText}
+                  onChange={handleSearchTextChange}
+                />
+              </Grid>
+
+              {/* Category Filter */}
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth variant="outlined" sx={{ height: "46px" }}>
+                  <InputLabel>Category</InputLabel>
                   <Select
-                    label="By category"
+                    label="Category"
                     value={selectedCategoryState.categoryId || ""}
                     onChange={(e) => handleCategoryChange("category", e.target.value)}
-                    autoWidth
-                    sx={{ height: "56px" }}
+                    sx={{ height: "46px" }}
                   >
+                    <MenuItem value="">All Categories</MenuItem>
                     {categories.map((category) => (
                       <MenuItem key={category.categoryId} value={category.categoryId}>
                         {category.category}
@@ -221,21 +247,19 @@ const ProductsFilter = ({ onFiltersChange }) => {
                     ))}
                   </Select>
                 </FormControl>
-              )}
-            </Grid>
-            {/* Subcategory Filter */}
-            {subCategories.length > 0 && (
-              <Grid item md={12}>
-                <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
-                  <InputLabel>By subcategory</InputLabel>
+              </Grid>
+
+              {/* Subcategory Filter */}
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth variant="outlined" sx={{ height: "46px" }}>
+                  <InputLabel>Subcategory</InputLabel>
                   <Select
-                    label="By subcategory"
+                    label="Subcategory"
                     value={selectedCategoryState.subCategoryId || "all"}
                     onChange={(e) => handleCategoryChange("subCategory", e.target.value)}
-                    autoWidth
-                    sx={{ height: "56px" }}
+                    sx={{ height: "46px" }}
                   >
-                    <MenuItem value="all">All</MenuItem>
+                    <MenuItem value="all">All Subcategories</MenuItem>
                     {subCategories.map((subCategory) => (
                       <MenuItem key={subCategory.categoryId} value={subCategory.categoryId}>
                         {subCategory.category}
@@ -244,32 +268,40 @@ const ProductsFilter = ({ onFiltersChange }) => {
                   </Select>
                 </FormControl>
               </Grid>
-            )}
-            {/* Third Level Category Filter */}
-            {thirdLevelCategories.length > 0 && (
-              <Grid item md={12}>
-                <FormControl fullWidth variant="outlined" sx={{ height: "56px" }}>
-                  <InputLabel>By third-level category</InputLabel>
-                  <Select
-                    label="By third-level category"
-                    value={selectedCategoryState.thirdLevelCategoryId || ""}
-                    onChange={(e) => handleCategoryChange("thirdLevelCategory", e.target.value)}
-                    autoWidth
-                    sx={{ height: "56px" }}
-                  >
-                    {thirdLevelCategories.map((thirdLevelCategory) => (
-                      <MenuItem
-                        key={thirdLevelCategory.categoryId}
-                        value={thirdLevelCategory.categoryId}
-                      >
-                        {thirdLevelCategory.category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+
+              {/* Price Range Slider */}
+              <Grid item xs={12} md={2}>
+                <Typography
+                  id="price-range-slider"
+                  gutterBottom
+                  variant="body2"
+                  color="textSecondary"
+                >
+                  Price Range: ${priceRange[0]} - ${priceRange[1]}
+                </Typography>
+                <Slider
+                  value={priceRange}
+                  onChange={handlePriceChange}
+                  valueLabelDisplay="auto"
+                  min={0}
+                  max={200}
+                />
               </Grid>
-            )}
-          </Grid>
+
+              {/* Search Button */}
+              <Grid item xs={12} md={2}>
+                <MDButton
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  sx={{ height: "46px" }}
+                  onClick={handleSearch}
+                >
+                  Search
+                </MDButton>
+              </Grid>
+            </Grid>
+          )}
         </CardContent>
       </Card>
     </MDBox>

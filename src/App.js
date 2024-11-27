@@ -56,11 +56,11 @@ import {
 } from "context";
 
 // Images
-import brandWhite from "assets/images/OMEGA_PROJECT_logo.png";
-import brandDark from "assets/images/OMEGA_PROJECT_logo.png";
+import brandWhite from "assets/images/vulcan_max.jpg";
+import brandDark from "assets/images/vulcan_max.jpg";
 
-import brandminiWhite from "assets/images/OMEGA_PROJECT_logo_min.png";
-import brandminiDark from "assets/images/OMEGA_PROJECT_logo_min.png";
+import brandminiWhite from "assets/images/vulcan_min.jpg";
+import brandminiDark from "assets/images/vulcan_min.jpg";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();

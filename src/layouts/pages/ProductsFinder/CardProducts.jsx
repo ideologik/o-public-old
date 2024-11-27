@@ -39,7 +39,6 @@ const CardProducts = ({ filters }) => {
   const [_, setBsSelectedProduct] = useAtom(bsSelectedProductAtom);
 
   const fetchProductsData = async (currentPage, showLoading = false) => {
-    console.log("filters", filters);
     if (Object.keys(filters).length === 0 || filters.AmazonCategoryId === null) {
       setProducts([]);
       return;
@@ -47,7 +46,7 @@ const CardProducts = ({ filters }) => {
 
     if (showLoading) setLoading(true);
     try {
-      console.log("filters", filters);
+      console.log("filters in cardsproducts", filters);
       if (filters.AmazonSubCategoryId === "all") filters.AmazonSubCategoryId = null;
       const response = await productsFinder({
         ...filters,

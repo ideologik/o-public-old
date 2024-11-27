@@ -125,15 +125,27 @@ export const fetchStoreByStoreId = async (store_id) => {
 };
 
 export const productsFinder = async ({
+  searchText = null,
   AmazonCategoryId = null,
   AmazonSubCategoryId = null,
   AmazonThirdCategoryId = null,
+  priceFrom = null,
+  priceTo = null,
   page = 0,
   total_rows = 10,
 }) => {
   try {
     const response = await client.get("productfinder", {
-      params: { AmazonCategoryId, AmazonSubCategoryId, AmazonThirdCategoryId, page, total_rows },
+      params: {
+        searchText,
+        AmazonCategoryId,
+        AmazonSubCategoryId,
+        AmazonThirdCategoryId,
+        priceFrom,
+        priceTo,
+        page,
+        total_rows,
+      },
     });
     return response;
   } catch (error) {

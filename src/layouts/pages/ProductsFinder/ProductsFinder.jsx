@@ -12,8 +12,6 @@ function ProductsFinder() {
   // Función que se pasa a SearchFilter para actualizar los filtros
   const handleFiltersChange = (newFilters) => {
     const { isCategoriesLoaded, ...filters } = newFilters;
-    console.log("filters", newFilters);
-    console.log("filters", filters);
     setFilters({ ...filters });
     if (newFilters.isCategoriesLoaded !== undefined) {
       setIsCategoriesLoaded(newFilters.isCategoriesLoaded);
