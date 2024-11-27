@@ -386,7 +386,7 @@ const ProductCardWithGallery = () => {
                   Potential Profit (monthly): ${calculatePotentialProfit()} USD
                 </Typography>
                 <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
-                  Rango de Ventas: {selectedProduct.bes_salesrank || "N/A"}{" "}
+                  Sale Rank: {selectedProduct.bes_salesrank || "N/A"}{" "}
                   {getTrendIcon(
                     selectedProduct.bes_salesrank,
                     selectedProduct.bes_salesrank90DaysAverage
@@ -459,7 +459,7 @@ const ProductCardWithGallery = () => {
                   color: suggestedPrice > selectedProduct.bes_price ? "red" : "inherit",
                 }}
               >
-                Precio Sugerido: ${parseFloat(suggestedPrice).toFixed(2)} USD
+                Suggested Price: ${parseFloat(suggestedPrice).toFixed(2)} USD
               </Typography>
               <Slider
                 value={suggestedPrice}
