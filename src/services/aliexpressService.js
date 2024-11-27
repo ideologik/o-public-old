@@ -7,7 +7,8 @@ export const findByImage = async (imageUrl) => {
     const url = `ProductFinder/AliExpressFindByImage?image_url=${encodeURIComponent(imageUrl)}`;
     const tmp = await client.post(url);
     const response = tmp.aliexpress_ds_image_search_response;
-    console.log("response", response);
+    console.log("response findByImage", response);
+    // {"aliexpress_ds_image_search_response":null}
 
     // Verificar el código de respuesta
     if (response.rsp_code !== "200") {

@@ -42,24 +42,41 @@ const SearchResults = () => {
       setLoading(true);
       setError(null);
 
-      try {
-        let response;
-        if (imageUrl) {
-          response = await findByImage(imageUrl);
-          const productData = response.data?.products?.traffic_image_product_d_t_o || [];
-          setProducts(productData);
-        } else if (query) {
-          response = await findByText(query);
-          const productData =
-            response.aliexpress_ds_text_search_response?.data?.products?.selection_search_product ||
-            [];
-          setProducts(productData);
-        }
-      } catch (err) {
-        setError("Error fetching products. Please try again.");
-      }
+      const maxRetries = 3;
+      let attempt = 0;
+      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-      setLoading(false);
+      while (attempt < maxRetries) {
+        try {
+          let response;
+          if (imageUrl) {
+            response = await findByImage(imageUrl);
+            const productData = response.data?.products?.traffic_image_product_d_t_o || [];
+            setProducts(productData);
+          } else if (query) {
+            response = await findByText(query);
+            const productData =
+              response.aliexpress_ds_text_search_response?.data?.products
+                ?.selection_search_product || [];
+            setProducts(productData);
+          }
+          // Si la llamada fue exitosa, salimos del bucle
+          setLoading(false);
+          return;
+        } catch (err) {
+          attempt++;
+          console.error(`Error fetching products en intento ${attempt}:`, err);
+          if (attempt >= maxRetries) {
+            setError(
+              "Error fetching products después de varios intentos. Por favor, inténtalo más tarde."
+            );
+            setLoading(false);
+            return;
+          }
+          // Esperar unos milisegundos antes de reintentar
+          await delay(500); // espera 500 milisegundos (ajusta según necesites)
+        }
+      }
     };
 
     fetchProducts();
@@ -190,9 +207,9 @@ const SearchResults = () => {
                         <Typography
                           variant="body2"
                           style={{
-                            whiteSpace: "nowrap", // Asegura que el texto no se divida en varias líneas
-                            overflow: "hidden", // Oculta el texto que no cabe en el contenedor
-                            textOverflow: "ellipsis", // Añade "..." al final si el texto es demasiado largo
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                           }}
                           color="textSecondary"
                         >
