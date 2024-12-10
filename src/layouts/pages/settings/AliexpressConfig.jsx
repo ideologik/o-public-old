@@ -15,39 +15,35 @@ function AliexpressConfig() {
   const [messageType, setMessageType] = useState("info");
 
   useEffect(() => {
+    console.log("ok", ok);
     const handleCreateAuth = async () => {
-      try {
-        // // Primero, verifica el estado de autenticación
-        // const authStatus = await statusAuth();
-        // const { status } = authStatus;
+      if (!ok) {
+        console.log("entro aca");
+        try {
+          // Primero, verifica el estado de autenticación
+          const authStatus = await statusAuth();
+          const { status } = authStatus;
+          console.log("status", authStatus);
 
-        // if (status === "Connected") {
-        //   // Mostrar mensaje si ya está conectado
-        //   setMessage("Already connected to AliExpress.");
-        //   setMessageType("success");
-        // } else if (ok === null) {
-        //   // Si no está conectado y ok es null, intenta crear la autenticación
-        //   const response = await createAuth();
-        //   if (response) {
-        //     // Redirigir a la URL proporcionada en la respuesta
-        //     window.location.href = response;
-        //   }
-        // }
-        if (ok === null) {
-          // Si ok es null, intenta crear la autenticación
-          const response = await createAuth();
-          if (response) {
-            // Redirigir a la URL proporcionada en la respuesta
-            window.location.href = response;
+          if (status === "Connected") {
+            // Mostrar mensaje si ya está conectado
+            setMessage("Already connected to AliExpress.");
+            setMessageType("success");
+          } else {
+            // Si no está conectado y ok es null, intenta crear la autenticación
+            const response = await createAuth();
+            if (response) {
+              // Redirigir a la URL proporcionada en la respuesta
+              window.location.href = response;
+            }
           }
+        } catch (err) {
+          console.error("Error verifying AliExpress authentication:", err);
+          setMessage("Error connecting to AliExpress.");
+          setMessageType("error");
         }
-      } catch (err) {
-        console.error("Error verifying AliExpress authentication:", err);
-        setMessage("Error connecting to AliExpress.");
-        setMessageType("error");
       }
     };
-
     handleCreateAuth();
   }, []);
 
@@ -59,6 +55,9 @@ function AliexpressConfig() {
     } else if (ok === "true") {
       setMessage("Successfully connected to AliExpress.");
       setMessageType("success");
+    } else {
+      setMessage("Connecting to AliExpress...");
+      setMessageType("info");
     }
   }, [ok]);
 

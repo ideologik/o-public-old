@@ -15,7 +15,11 @@ import {
 import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
 import Slider from "@material-ui/core/Slider";
-import { fetchDealCategories, fetchDealSubCategories } from "services";
+import {
+  productFinderCategories,
+  productFinderSubCategories,
+  productFinderPriceRange,
+} from "services";
 import { useAtom } from "jotai";
 import { bsSelectedCategoryAtom } from "stores/productAtom";
 
@@ -42,8 +46,10 @@ const ProductsFilter = ({ onFiltersChange }) => {
   const [thirdLevelCategories, setThirdLevelCategories] = useState([]);
 
   const [selectedCategoryState, setSelectedCategoryState] = useAtom(bsSelectedCategoryAtom);
-  const [priceRange, setPriceRange] = useState([50, 150]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [priceRangeSelected, setPriceRangeSelected] = useState([0, 10000]);
   const [searchText, setSearchText] = useState("");
+  const [sortOption, setSortOption] = useState("0");
 
   const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
 
@@ -51,7 +57,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
   useEffect(() => {
     const fetchDealsGroups = async () => {
       setIsCategoriesLoaded(false);
-      const productGroups = await fetchDealCategories();
+      const productGroups = await productFinderCategories();
       const sortedCategories = productGroups.sort((a, b) => a.category.localeCompare(b.category));
 
       sortedCategories.forEach((cat) => {
@@ -65,8 +71,6 @@ const ProductsFilter = ({ onFiltersChange }) => {
       setCategories(cleanedCategories);
       setIsCategoriesLoaded(true);
 
-      console.log("lo pone  a true a setIsCategoriesLoaded");
-
       // Establecer categoría predeterminada y subcategorías si no hay categoría seleccionada
       if (!selectedCategoryState.categoryId) {
         const defaultCategory = cleanedCategories.find((cat) => cat.category === "Toys & Games");
@@ -79,20 +83,25 @@ const ProductsFilter = ({ onFiltersChange }) => {
           setSubCategories(defaultCategory.subCategories || []);
         }
       } else {
-        // Si ya hay una categoría seleccionada, establece las subcategorías correspondientes
         const currentCategory = cleanedCategories.find(
           (cat) => cat.categoryId === selectedCategoryState.categoryId
         );
         setSubCategories(currentCategory?.subCategories || []);
       }
     };
+    const fetchPriceRange = async () => {
+      const priceRange = await productFinderPriceRange();
+      setPriceRange([priceRange.min, priceRange.max]);
+      setPriceRangeSelected([priceRange.min, priceRange.max]);
+    };
 
     fetchDealsGroups();
+    fetchPriceRange();
   }, []);
 
-  // Actualizar subcategorías cuando cambia la categoría seleccionada o las categorías se cargan
+  // Actualizar subcategorías cuando cambia la categoría seleccionada
   useEffect(() => {
-    if (!categories.length) return; // Esperar a que las categorías se carguen
+    if (!categories.length) return;
 
     const currentCategory = categories.find(
       (cat) => cat.categoryId === selectedCategoryState.categoryId
@@ -118,7 +127,7 @@ const ProductsFilter = ({ onFiltersChange }) => {
   // Actualizar categorías de tercer nivel cuando cambia la subcategoría seleccionada o las subcategorías se cargan
   useEffect(() => {
     const fetchThirdLevelCategories = async (id) => {
-      const thirdLevelCategories = await fetchDealSubCategories(id);
+      const thirdLevelCategories = await productFinderSubCategories(id);
       return thirdLevelCategories;
     };
 
@@ -184,16 +193,22 @@ const ProductsFilter = ({ onFiltersChange }) => {
       AmazonThirdCategoryId: selectedCategoryState.thirdLevelCategoryId,
       priceFrom: priceRange[0],
       priceTo: priceRange[1],
+      sort_by: sortOption,
 
       isCategoriesLoaded,
     });
   };
 
   const handlePriceChange = (event, newValue) => {
-    setPriceRange(newValue);
+    setPriceRangeSelected(newValue);
   };
+
   const handleSearchTextChange = (event) => {
     setSearchText(event.target.value);
+  };
+
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
   };
 
   const handleSearch = () => {
@@ -201,8 +216,9 @@ const ProductsFilter = ({ onFiltersChange }) => {
       searchText,
       AmazonCategoryId: selectedCategoryState.categoryId,
       AmazonSubCategoryId: selectedCategoryState.subCategoryId,
-      priceFrom: priceRange[0],
-      priceTo: priceRange[1],
+      priceFrom: priceRangeSelected[0],
+      priceTo: priceRangeSelected[1],
+      sort_by: sortOption,
     });
   };
 
@@ -215,92 +231,111 @@ const ProductsFilter = ({ onFiltersChange }) => {
               <CircularProgress size={30} />
             </MDBox>
           ) : (
-            <Grid container spacing={2} alignItems="center">
-              {/* Search Field */}
-              <Grid item xs={12} md={2}>
-                <TextField
-                  fullWidth
-                  label="Search"
-                  variant="outlined"
-                  sx={{ height: "46px" }}
-                  InputProps={{ style: { height: "46px" } }}
-                  value={searchText}
-                  onChange={handleSearchTextChange}
-                />
-              </Grid>
-
-              {/* Category Filter */}
-              <Grid item xs={12} md={3}>
-                <FormControl fullWidth variant="outlined" sx={{ height: "46px" }}>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    label="Category"
-                    value={selectedCategoryState.categoryId || ""}
-                    onChange={(e) => handleCategoryChange("category", e.target.value)}
+            <>
+              <Grid container spacing={2} alignItems="center">
+                {/* Search Field */}
+                <Grid item xs={12} md={2}>
+                  <TextField
+                    fullWidth
+                    label="Search"
+                    variant="outlined"
                     sx={{ height: "46px" }}
-                  >
-                    <MenuItem value="">All Categories</MenuItem>
-                    {categories.map((category) => (
-                      <MenuItem key={category.categoryId} value={category.categoryId}>
-                        {category.category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+                    InputProps={{ style: { height: "46px" } }}
+                    value={searchText}
+                    onChange={handleSearchTextChange}
+                  />
+                </Grid>
 
-              {/* Subcategory Filter */}
-              <Grid item xs={12} md={3}>
-                <FormControl fullWidth variant="outlined" sx={{ height: "46px" }}>
-                  <InputLabel>Subcategory</InputLabel>
-                  <Select
-                    label="Subcategory"
-                    value={selectedCategoryState.subCategoryId || "all"}
-                    onChange={(e) => handleCategoryChange("subCategory", e.target.value)}
+                {/* Category Filter */}
+                <Grid item xs={12} md={3}>
+                  <FormControl fullWidth variant="outlined" sx={{ height: "46px" }}>
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      label="Category"
+                      value={selectedCategoryState.categoryId || ""}
+                      onChange={(e) => handleCategoryChange("category", e.target.value)}
+                      sx={{ height: "46px" }}
+                    >
+                      <MenuItem value="">All Categories</MenuItem>
+                      {categories.map((category) => (
+                        <MenuItem key={category.categoryId} value={category.categoryId}>
+                          {category.category}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                {/* Subcategory Filter */}
+                <Grid item xs={12} md={3}>
+                  <FormControl fullWidth variant="outlined" sx={{ height: "46px" }}>
+                    <InputLabel>Subcategory</InputLabel>
+                    <Select
+                      label="Subcategory"
+                      value={selectedCategoryState.subCategoryId || "all"}
+                      onChange={(e) => handleCategoryChange("subCategory", e.target.value)}
+                      sx={{ height: "46px" }}
+                    >
+                      <MenuItem value="all">All Subcategories</MenuItem>
+                      {subCategories.map((subCategory) => (
+                        <MenuItem key={subCategory.categoryId} value={subCategory.categoryId}>
+                          {subCategory.category}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                {/* Price Range Slider */}
+                <Grid item xs={12} md={2}>
+                  <Typography id="price-range-slider" variant="body2" color="textSecondary">
+                    Price Range: ${priceRangeSelected[0].toFixed(2)} - $
+                    {priceRangeSelected[1].toFixed(2)}
+                  </Typography>
+                  <Slider
+                    value={priceRangeSelected}
+                    onChange={handlePriceChange}
+                    valueLabelDisplay="auto"
+                    min={priceRange[0]}
+                    max={priceRange[1]}
+                  />
+                </Grid>
+
+                {/* Search Button */}
+                <Grid item xs={12} md={2}>
+                  <MDButton
+                    fullWidth
+                    variant="contained"
+                    color="primary"
                     sx={{ height: "46px" }}
+                    onClick={handleSearch}
                   >
-                    <MenuItem value="all">All Subcategories</MenuItem>
-                    {subCategories.map((subCategory) => (
-                      <MenuItem key={subCategory.categoryId} value={subCategory.categoryId}>
-                        {subCategory.category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    Search
+                  </MDButton>
+                </Grid>
               </Grid>
 
-              {/* Price Range Slider */}
-              <Grid item xs={12} md={2}>
-                <Typography
-                  id="price-range-slider"
-                  gutterBottom
-                  variant="body2"
-                  color="textSecondary"
-                >
-                  Price Range: ${priceRange[0]} - ${priceRange[1]}
-                </Typography>
-                <Slider
-                  value={priceRange}
-                  onChange={handlePriceChange}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={200}
-                />
+              <Grid container spacing={2} alignItems="center" justifyContent="flex-end" mt={2}>
+                {/* Sort Filter */}
+                <Grid item xs={12} md={2}>
+                  <FormControl fullWidth variant="outlined" sx={{ height: "36px" }}>
+                    <InputLabel>Sort by</InputLabel>
+                    <Select
+                      label="Sort by"
+                      value={sortOption}
+                      onChange={handleSortChange}
+                      sx={{ height: "36px" }}
+                    >
+                      <MenuItem value="0">Relevance</MenuItem>
+                      <MenuItem value="1">Best Selling</MenuItem>
+                      <MenuItem value="2">Price: Low to High</MenuItem>
+                      <MenuItem value="3">Price: High to Low</MenuItem>
+                      <MenuItem value="4">Rating: High to Low</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
-
-              {/* Search Button */}
-              <Grid item xs={12} md={2}>
-                <MDButton
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  sx={{ height: "46px" }}
-                  onClick={handleSearch}
-                >
-                  Search
-                </MDButton>
-              </Grid>
-            </Grid>
+            </>
           )}
         </CardContent>
       </Card>

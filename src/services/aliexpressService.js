@@ -43,12 +43,8 @@ export const findByText = async (searchText) => {
 
 export const createAuth = async () => {
   try {
-    const oldBaseURL = process.env.REACT_APP_API_BASE_URL;
-
-    setBaseURL(process.env.REACT_APP_API_BASE_URL.replace("io/", ""));
     const url = `aliexpress/Create`;
     const response = await client.post(url);
-    setBaseURL(oldBaseURL);
 
     return response;
   } catch (error) {
@@ -59,11 +55,8 @@ export const createAuth = async () => {
 
 export const statusAuth = async () => {
   try {
-    const oldBaseURL = process.env.REACT_APP_API_BASE_URL;
-    setBaseURL(process.env.REACT_APP_API_BASE_URL.replace("io/", ""));
     const url = `aliexpress/status`;
     const response = await client.get(url);
-    setBaseURL(oldBaseURL);
 
     return response;
   } catch (error) {

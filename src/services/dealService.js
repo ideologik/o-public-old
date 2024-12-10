@@ -1,27 +1,6 @@
 // src/api/dealService.js
 import client from "services/ApiClient";
 
-export const fetchDealCategories = async () => {
-  try {
-    const response = await client.get("deals/categories?include_child=true");
-    return response;
-  } catch (error) {
-    console.error("Error fetching deal categories:", error);
-    throw error;
-  }
-};
-export const fetchDealSubCategories = async (parent_categoryId) => {
-  try {
-    const response = await client.get(
-      `deals/subcategories?include_child=true&parent_categoryId=${parent_categoryId}`
-    );
-    return response;
-  } catch (error) {
-    console.error("Error fetching deal categories:", error);
-    throw error;
-  }
-};
-
 export const fetchDeals = async (filters) => {
   console.log("filters", filters, Object.keys(filters));
   if (!filters || Object.keys(filters).length === 0) return { data: [] };
@@ -121,35 +100,5 @@ export const fetchStoreByStoreId = async (store_id) => {
   } catch (error) {
     console.error("Error fetching store:", error);
     throw new Error("Error fetching store");
-  }
-};
-
-export const productsFinder = async ({
-  searchText = null,
-  AmazonCategoryId = null,
-  AmazonSubCategoryId = null,
-  AmazonThirdCategoryId = null,
-  priceFrom = null,
-  priceTo = null,
-  page = 0,
-  total_rows = 10,
-}) => {
-  try {
-    const response = await client.get("productfinder", {
-      params: {
-        searchText,
-        AmazonCategoryId,
-        AmazonSubCategoryId,
-        AmazonThirdCategoryId,
-        priceFrom,
-        priceTo,
-        page,
-        total_rows,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    throw new Error("Error fetching products");
   }
 };
