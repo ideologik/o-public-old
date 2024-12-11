@@ -1,3 +1,4 @@
+//services/aliexpressService.js
 import client, { setBaseURL } from "services/ApiClient";
 
 // Servicio para buscar por imagen usando POST con query string

@@ -1,3 +1,5 @@
+// services/productService.js
+
 import client from "services/ApiClient";
 
 export const fetchProducts = async (filters) => {

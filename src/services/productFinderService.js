@@ -1,4 +1,4 @@
-// src/api/dealService.js
+// services/productFinderService.js
 import client from "services/ApiClient";
 
 export const productsFinder = async ({

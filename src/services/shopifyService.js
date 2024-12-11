@@ -1,3 +1,4 @@
+// services/shopifyService.js
 import client from "services/ApiClient";
 
 export const shopifyCreateProduct = async (product) => {
